@@ -36,24 +36,12 @@
         .animate-shake {
             animation: shake 0.2s ease-in-out 2;
         }
-        /* Custom Scrollbar untuk senarai topik */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between overflow-x-hidden antialiased text-slate-800">
+<body class="min-h-screen flex flex-col items-center justify-start overflow-x-hidden antialiased text-slate-800">
 
-    <!-- APP CONTAINER -->
-    <div class="max-w-md w-full mx-auto bg-white/80 backdrop-blur-md min-h-screen shadow-2xl flex flex-col relative pb-6 border-x border-white/40">
+    <!-- APP CONTAINER - Ditukar kepada h-auto untuk membolehkan skrol keseluruhan halaman -->
+    <div class="max-w-md w-full mx-auto bg-white/80 backdrop-blur-md min-h-screen h-auto shadow-2xl flex flex-col relative pb-6 border-x border-white/40">
         
         <!-- HEADER / STATUS BAR -->
         <header id="appHeader" class="hidden bg-gradient-to-r from-blue-500 to-cyan-500 text-white p-4 rounded-b-3xl shadow-lg sticky top-0 z-40">
@@ -139,8 +127,8 @@
                     </button>
                 </div>
                 
-                <!-- Grid Kad Topik -->
-                <div id="topicsGrid" class="grid grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto p-1"></div>
+                <!-- Grid Kad Topik - Sekatan max-h dan overflow telah dibuang supaya seluruh halaman boleh diskrol -->
+                <div id="topicsGrid" class="grid grid-cols-2 gap-4 p-1"></div>
 
                 <!-- Bahagian Pencapaian / Lencana -->
                 <div class="bg-white p-4 rounded-2xl shadow-inner border border-slate-100 mt-4">
@@ -535,7 +523,7 @@
                     { q: "Amir mempunyai RM100. Dia membeli kasut berharga RM65. Berapakah baki wang Amir?", a: ["RM25", "RM30", "RM35", "RM40"], c: "RM35" },
                     { q: "Berapakah jumlah wang RM40 + RM35 + RM15?", a: ["RM80", "RM85", "RM90", "RM95"], c: "RM90" },
                     { q: "Kakak membeli sehelai baju berharga RM45 dan sepasang stokin berharga RM12. Berapakah jumlah yang dibayar?", a: ["RM55", "RM56", "RM57", "RM58"], c: "RM57" },
-                    { q: "Seorang murid mempunyai RM60. Dia membeli sebuah buku berharga RM18 dan sebuah kotak pensel berharga RM22. Berapakah baki wangnya?", a: ["RM18", "RM20", "RM22", "RM24"], c: "RM20" }
+                    { q: "Seorang murid mempunyai RM60. Dia membeli sebuah buku berharga RM18 and sebuah kotak pensel berharga RM22. Berapakah baki wangnya?", a: ["RM18", "RM20", "RM22", "RM24"], c: "RM20" }
                 ]
             },
             masa_waktu: {
@@ -567,7 +555,7 @@
                 title: "Ukuran & Sukatan", icon: "📏", badge: "📏 Pakar Ukur",
                 questions: [
                     { q: "Apakah unit yang sesuai untuk mengukur panjang sebatang pensel?", a: ["kg", "cm", "mℓ", "g"], c: "cm" },
-                    { q: "Apakah unit yang sesuai untuk mengukur panjang sebuah padang?", a: ["cm", "g", "m", "mℓ"], c: "m" },
+                    { q: "Apakah unit yang brassing sesuai untuk mengukur panjang sebuah padang?", a: ["cm", "g", "m", "mℓ"], c: "m" },
                     { q: "Sebatang pembaris mempunyai panjang 30 ____.", a: ["kg", "mℓ", "cm", "g"], c: "cm" },
                     { q: "Yang manakah lebih panjang?", a: ["50 cm", "1 m", "80 cm", "90 cm"], c: "1 m" },
                     { q: "Apakah unit yang sesuai untuk mengukur jisim sebiji epal?", a: ["g", "kg", "cm", "mℓ"], c: "g" },
@@ -664,6 +652,8 @@
                 header.classList.remove('hidden');
                 updateHeaderUI();
             }
+            // Automatik skrol ke atas setiap kali menukar halaman paparan
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function loadLocalData() {
@@ -786,7 +776,7 @@
             }
             userProfile.badges.forEach(badgeText => {
                 const badge = document.createElement('span');
-                badge.className = "bg-yellow-100 border border-yellow-300 text-yellow-800 font-black text-[11px] px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1 animate-pulse";
+                badge.className = "bg-yellow-100 border border-yellow-300 text-yellow-800 font-black text-[11px] px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1";
                 badge.innerHTML = badgeText;
                 container.appendChild(badge);
             });
