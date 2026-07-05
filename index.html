@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bijak Math Tahun 2 / Smart Math Grade 2</title>
+    <title>Bijak Math tahun 1 / Smart Math grade 1</title>
     <!-- Tailwind CSS untuk Rekabentuk Moden & Responsif -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Nunito (Mudah dibaca & Mesra Kanak-kanak) -->
@@ -89,7 +89,7 @@
                 </div>
                 <div class="space-y-2">
                     <div class="text-7xl drop-shadow-md animate-bounce inline-block">✏️🔢</div>
-                    <h1 class="text-4xl font-extrabold text-blue-600 tracking-wide drop-shadow" id="welcomeTitle">Bijak Math<br><span class="text-emerald-500 text-3xl">Tahun 2</span></h1>
+                    <h1 class="text-4xl font-extrabold text-blue-600 tracking-wide drop-shadow" id="welcomeTitle">Bijak Math<br><span class="text-emerald-500 text-3xl">tahun 1</span></h1>
                 </div>
                 <!-- Maskot Kartun -->
                 <div class="w-48 h-48 bg-yellow-300 rounded-full flex items-center justify-center shadow-inner relative border-4 border-white animate-pulse">
@@ -268,7 +268,7 @@
 
                 <div class="bg-slate-100 p-3 rounded-xl text-center text-[11px] text-slate-400 leading-relaxed" id="settingsBranding">
                     <span class="font-bold text-slate-500">Bijak Math v2.0</span><br>
-                    Silibus KSSR Matematik Tahun 2 Kementerian Pendidikan Malaysia.<br>
+                    Silibus KSSR Matematik tahun 1 Kementerian Pendidikan Malaysia.<br>
                     100% Fungsi Offline & Selamat Tanpa Iklan.
                 </div>
             </div>
@@ -276,13 +276,82 @@
 
         <!-- FOOTER BRANDING -->
         <footer class="text-center text-[10px] text-slate-400/80 font-bold uppercase tracking-wider pb-2" id="footerText">
-            Bijak Math Tahun 2 • KSSR Malaysia
+            Bijak Math tahun 1 • KSSR Malaysia
         </footer>
     </div>
 
     <!-- JAVASCRIPT LOGIC & BANK SOALAN -->
     <script>
+        // 1. Fungsi untuk mengocok (shuffle) apa-apa array
+function shuffleArray(array) {
+    let arr = [...array]; // Buat salinan agar data asal tidak terjejas
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+// 2. Gunakan fungsi ini semasa anda memproses soalan
+// Contoh: Jika anda ada fungsi 'paparSoalan'
+function paparSoalan(soalanObjek) {
+    // KOCOK PILIHAN JAWAPAN DI SINI
+    const pilihanRawak = shuffleArray(soalanObjek.a);
+    
+    // Sekarang gunakan 'pilihanRawak' untuk bina butang/pilihan anda
+    pilihanRawak.forEach(jawapan => {
+        // Contoh: bina butang atau radio button
+        // console.log("Pilihan: " + jawapan);
+        
+        // PENTING: Untuk semak jawapan, bandingkan dengan soalanObjek.c
+        // JANGAN bandingkan dengan index (contoh: jawapan[1])
+    });
+}
+        // Andaikan 'kategori' adalah "nombor_bulat"
+function startQuiz(kategori) {
+    // 1. Ambil salinan soalan agar data asal tidak berubah
+    let soalanSet = [...BANK_SOALAN[kategori].questions];
+
+    // 2. Shuffle turutan soalan
+    soalanSet = shuffle(soalanSet);
+
+    // 3. Untuk setiap soalan dalam set tersebut, shuffle pilihan jawapan (a)
+    soalanSet.forEach(item => {
+        item.a = shuffle([...item.a]);
+    });
+
+    // 4. Sekarang gunakan 'soalanSet' ini untuk dipaparkan dalam UI anda
+    // Soalan akan berubah kedudukan, dan jawapan dalam soalan pun akan rawak!
+    renderKuiz(soalanSet);
+}
+        // Fungsi untuk menyusun array secara rawak (Fisher-Yates Shuffle)
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+        // Cara semak jawapan yang betul selepas di-shuffle
+function semakJawapan(jawapanDipilih, jawapanBetul) {
+    if (jawapanDipilih === jawapanBetul) {
+        console.log("Tahniah, betul!");
+    } else {
+        console.log("Salah!");
+    }
+}
+
+// Contoh cara anda memanggil fungsi ini sebelum memaparkan soalan:
+function getSoalanRawak(kategori, index) {
+    let soalan = { ...BANK_SOALAN[kategori].questions[index] }; // Salin data soalan
+    
+    // Susun pilihan jawapan secara rawak
+    soalan.a = shuffleArray([...soalan.a]); 
+    
+    return soalan;
+}
         let currentLang = 'ms'; // Bahasa default
+
 
         const I18N_DICTIONARY = {
             ms: {
