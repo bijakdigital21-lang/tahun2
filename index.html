@@ -326,6 +326,16 @@
             border-radius: 50%;
             border: 4px solid var(--primary-yellow);
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            animation: kiddora-logo-float 3.2s ease-in-out infinite;
+        }
+
+        @keyframes kiddora-logo-float {
+            0%, 100% { transform: translateY(0) rotate(-3deg); }
+            50% { transform: translateY(-10px) rotate(3deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .home-app-logo, #login-screen .login-logo-wrap { animation: none !important; }
         }
 
         .home-intro-title {
@@ -3256,6 +3266,7 @@
             background: rgba(255,255,255,.95);
             box-shadow: 0 10px 25px rgba(0, 70, 95, .20);
             border: 5px solid rgba(255,255,255,.55);
+            animation: kiddora-logo-float 3.2s ease-in-out infinite;
         }
         #login-screen .login-logo-wrap img {
             width: 100%;
