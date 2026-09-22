@@ -6173,20 +6173,39 @@
         // after the app has been left open in the background.
         let audioCtx = null;
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        function replaceSoundContext() {
+            if (!AudioContextClass) return null;
+            const previous = audioCtx;
+            audioCtx = new AudioContextClass();
+            const current = audioCtx;
+            current.addEventListener('statechange', () => {
+                if (current === audioCtx && !document.hidden && current.state === 'interrupted') wakeAppSound();
+            });
+            if (previous && previous.state !== 'closed') previous.close().catch(() => {});
+            return current;
+        }
         function getSoundContext() {
             if (!AudioContextClass) return null;
-            if (!audioCtx || audioCtx.state === 'closed') audioCtx = new AudioContextClass();
+            if (!audioCtx || audioCtx.state === 'closed') replaceSoundContext();
             return audioCtx;
         }
         async function playAppSound(draw) {
             try {
                 let ctx = getSoundContext();
                 if (!ctx) return;
-                if (ctx.state !== 'running') await ctx.resume();
-                // A context may have been closed while resume was pending.
-                if (ctx.state === 'closed') {
+                if (ctx.state === 'interrupted' || ctx.state === 'closed') {
+                    // iOS can leave an interrupted context silent after returning to the app.
+                    ctx = replaceSoundContext();
+                }
+                if (ctx.state !== 'running') {
+                    await Promise.race([ctx.resume(), new Promise(resolve => setTimeout(resolve, 800))]);
+                }
+                if (ctx.state !== 'running') {
                     ctx = getSoundContext();
-                    await ctx.resume();
+                    if (ctx.state !== 'running') {
+                        ctx = replaceSoundContext();
+                        await Promise.race([ctx.resume(), new Promise(resolve => setTimeout(resolve, 800))]);
+                    }
                 }
                 if (ctx.state === 'running') draw(ctx);
             } catch (error) {
@@ -6195,13 +6214,17 @@
         }
         function wakeAppSound() {
             const ctx = getSoundContext();
-            if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
+            if (ctx?.state === 'interrupted') {
+                replaceSoundContext().resume().catch(() => {});
+            } else if (ctx && ctx.state !== 'running') ctx.resume().catch(() => {});
         }
         document.addEventListener('pointerdown', wakeAppSound, {passive: true});
+        document.addEventListener('touchstart', wakeAppSound, {passive: true});
         document.addEventListener('keydown', wakeAppSound);
         document.addEventListener('visibilitychange', () => {
             if (!document.hidden && audioCtx) wakeAppSound();
         });
+        window.addEventListener('pageshow', wakeAppSound);
 
         function playClickSound() {
             return playAppSound((audioCtx) => {
