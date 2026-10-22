@@ -13720,8 +13720,8 @@ document.addEventListener('DOMContentLoaded', () => {
 #pz-instruction{font-weight:700;color:#4b4969;margin:12px 0}
 #pz-board{width:min(100%,610px);margin:auto;background:#eee6ff;border:5px solid white;border-radius:16px;overflow:hidden;box-shadow:0 5px 20px #6e4b9830;line-height:0}
 #pz-board svg{width:100%;height:auto;display:block}
-#pz-board path.pz-target{cursor:pointer;outline:none;stroke:#7653ae;stroke-width:2;stroke-linejoin:round;fill:transparent;vector-effect:non-scaling-stroke}
-#pz-board path.pz-target:focus{stroke:#ff9a00;stroke-width:5}
+#pz-board path.pz-target{cursor:pointer;outline:none;stroke:none;fill:transparent}
+#pz-board path.pz-target:focus{stroke:none;outline:none}
 #pz-tray{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:660px;margin:18px auto}
 #pz-tray button{min-width:0;height:clamp(80px,17vw,120px);background:#faf5ff;border:3px solid #e0d2f4;border-radius:16px;padding:5px;touch-action:none;cursor:grab;transition:background .15s}
 #pz-tray button.pz-selected{border-color:#f5a000;background:#fff2c4;box-shadow:0 0 0 3px #ffd55c66}
@@ -13817,7 +13817,7 @@ function startDrag(e,p){
  p.button.setPointerCapture(e.pointerId);positionGhost(e);
 }
 function positionGhost(e){if(!drag)return;drag.ghost.style.left=e.clientX-drag.w/2+'px';drag.ghost.style.top=e.clientY-drag.h/2+'px';}
-function moveDrag(e){if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>7)drag.moved=true;positionGhost(e);}
+function moveDrag(e){if(!drag||e.pointerId!==drag.pointer)return;e.preventDefault();if(Math.hypot(e.clientX-drag.startX,e.clientY-drag.startY)>7&&!drag.moved){drag.moved=true;if(typeof playClickSound==='function')playClickSound();}positionGhost(e);}
 function endDrag(e){
  if(!drag||e.pointerId!==drag.pointer)return;
  const state=drag;cancelDrag();if(!state.moved)return;
@@ -13832,21 +13832,58 @@ function attempt(pieceId,spaceId){
  p.placedOK=true;p.placed.setAttribute('visibility','visible');p.target.style.display='none';p.button.disabled=true;p.button.classList.remove('pz-selected');p.button.setAttribute('aria-pressed','false');selected=null;done++;status();
  if(done===6)complete();
 }
-function sayExcellent(){if(!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(ms()?'Bagus!':'Excellent!');u.lang=ms()?'ms-MY':'en-US';u.rate=.85;u.pitch=1.15;speechSynthesis.speak(u);}catch(e){}}
+function speakPuzzle(text){
+ if(!('speechSynthesis' in window)||typeof SpeechSynthesisUtterance==='undefined')return;
+ try{
+  const synth=window.speechSynthesis;synth.cancel();synth.resume();
+  const utterance=new SpeechSynthesisUtterance(text);
+  const voices=synth.getVoices();
+  const voice=voices.find(v=>v.lang==='en-US')||voices.find(v=>/^en[-_]/i.test(v.lang));
+  if(voice)utterance.voice=voice;
+  utterance.lang=voice?voice.lang:'en-US';utterance.volume=1;utterance.rate=.85;utterance.pitch=1.1;
+  // Keep the utterance alive until speech finishes on mobile browsers.
+  speakPuzzle.current=utterance;
+  utterance.onend=utterance.onerror=()=>{if(speakPuzzle.current===utterance)speakPuzzle.current=null;};
+  synth.speak(utterance);
+ }catch(error){console.warn('Puzzle speech could not play:',error);}
+}
+// Ask the browser to prepare installed voices before the first completion.
+if('speechSynthesis' in window)window.speechSynthesis.getVoices();
 function popup(text){el('pz-pop-title').textContent=text;el('pz-pop').hidden=false;}
 function complete(){
- busy=true;const token=session;popup('Excellent!');sayExcellent();
+ busy=true;const token=session;popup('Excellent!');speakPuzzle('Excellent!');
  timer=setTimeout(()=>{
   if(token!==session||!screen.classList.contains('active'))return;
   el('pz-pop').hidden=true;
   if(round<9){round++;loadRound();}
-  else{popup('All Done!');timer=setTimeout(()=>{if(token!==session||!screen.classList.contains('active'))return;stop();showScreen('home-screen');},2000);}
+  else{popup('All Done!');speakPuzzle('All done!');timer=setTimeout(()=>{if(token!==session||!screen.classList.contains('active'))return;stop();showScreen('home-screen');},2000);}
  },2000);
 }
 window.addEventListener('resize',cancelDrag);
 })();
 </script>
 <!-- END PUZZLE MODULE -->
+
+
+<!-- Click feedback, including controls that have no inline sound handler. -->
+<script>
+(function(){
+ const originalClickSound=window.playClickSound;
+ if(typeof originalClickSound!=='function')return;
+ let clickEvent=null,played=false;
+ window.playClickSound=function(){
+  if(clickEvent){if(played)return;played=true;}
+  return originalClickSound.apply(this,arguments);
+ };
+ document.addEventListener('click',function(event){
+  clickEvent=event;played=false;
+  window.playClickSound();
+  // Inline and bubbling handlers share this event, so their existing calls
+  // do not play a second copy of the same click sound.
+  setTimeout(()=>{if(clickEvent===event){clickEvent=null;played=false;}},0);
+ },true);
+})();
+</script>
 
 </body>
 </html>
