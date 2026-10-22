@@ -7148,23 +7148,17 @@
                 }
             });
         }
-        // One voice and identical settings for spoken feedback throughout the app.
-        let feedbackVoice = null;
         function speakAppFeedback(text) {
-            if (!('speechSynthesis' in window)) return null;
-            const voices = speechSynthesis.getVoices();
-            if (!feedbackVoice) feedbackVoice = voices.find(v => v.lang === 'en-US' && v.default)
-                || voices.find(v => v.lang === 'en-US') || voices.find(v => /^en[-_]/i.test(v.lang)) || null;
+            if(!('speechSynthesis' in window))return;
             speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'en-US'; utterance.rate = .8; utterance.pitch = 1.05;
-            if (feedbackVoice) utterance.voice = feedbackVoice;
-            speechSynthesis.speak(utterance);
-            return utterance;
+            const voice=new SpeechSynthesisUtterance(text);
+            voice.lang='en-US';voice.rate=.8;voice.pitch=1.05;
+            window.appFeedbackVoice=voice;
+            speechSynthesis.speak(voice);
         }
         function announceAllDone() {
             playCompletionApplause();
-            return speakAppFeedback('All done');
+            speakAppFeedback('All done');
         }
 
         // Begin a silent audio stream during the actual Log in tap. Browsers can
@@ -9361,7 +9355,7 @@
             document.getElementById('learn123-listen-btn').textContent=t.listen;
             document.getElementById('learn123-back-btn').textContent=t.back;
         }
-        function speakText123(text, rate=.65){ if(/^correct[!.]?$/i.test(String(text).trim()))return speakAppFeedback(text); if(!('speechSynthesis' in window))return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=getNum123Lang()==='ms'?'ms-MY':'en-US'; u.rate=rate; u.pitch=1.08; speechSynthesis.speak(u); }
+        function speakText123(text, rate=.65){ if(!('speechSynthesis' in window))return; speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=getNum123Lang()==='ms'?'ms-MY':'en-US'; u.rate=rate; u.pitch=1.08; speechSynthesis.speak(u); }
         function speakLearn123(){ const words=getNum123Words(); speakText123(`${learn123Index}. ${words[learn123Index]}`,.55); }
         function nextLearn123(){ const t=getNum123Text(); if(learn123Index<20){learn123Index++;renderLearn123();speakLearn123();}else{alert(t.learnDone);open123Menu();} }
         function prevLearn123(){ if(learn123Index>1){learn123Index--;renderLearn123();speakLearn123();} }
@@ -13731,7 +13725,7 @@ document.addEventListener('DOMContentLoaded', () => {
 #pz-board{width:min(100%,610px);margin:auto;background:#eee6ff;border:5px solid white;border-radius:16px;overflow:hidden;box-shadow:0 5px 20px #6e4b9830;line-height:0}
 #pz-board svg{width:100%;height:auto;display:block}
 #pz-board path.pz-target{cursor:pointer;outline:none;stroke:none;stroke-width:0;fill:transparent;pointer-events:all}
-#pz-board:focus-within{outline:3px solid #ff9a00;outline-offset:3px}
+#pz-board path.pz-target:focus{stroke:none;outline:none}
 #pz-tray{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:660px;margin:18px auto}
 #pz-tray button{min-width:0;height:clamp(80px,17vw,120px);background:#faf5ff;border:3px solid #e0d2f4;border-radius:16px;padding:5px;touch-action:none;cursor:grab;transition:background .15s}
 #pz-tray button.pz-selected{border-color:#f5a000;background:#fff2c4;box-shadow:0 0 0 3px #ffd55c66}
@@ -13761,13 +13755,15 @@ function svg(tag,attrs={}){const n=document.createElementNS(NS,tag);Object.entri
 const screen=document.createElement('div');screen.id='puzzle-screen';screen.className='card';
 screen.innerHTML='<div class="pz-top"><h2>🧩 Puzzle</h2><span id="pz-progress"></span></div><p id="pz-instruction"></p><div id="pz-board"></div><div id="pz-tray"></div><p id="pz-status" role="status" aria-live="polite"></p><div id="pz-controls"><button id="pz-retry" class="action-btn" type="button" hidden></button><button id="pz-home" class="action-btn home-btn" type="button"></button></div>';
 el('home-screen').parentNode.appendChild(screen);
-// A pointer tap/drag gets one click sound; keyboard activation uses its click event.
-screen.addEventListener('pointerdown',e=>{if(e.button===0)playClickSound();},{passive:true});
-screen.addEventListener('click',e=>{if(e.detail===0)playClickSound();});
+// Capture taps before piece dragging prevents the browser click event.
+function puzzleClickSound(){if(typeof playClickSound==='function')playClickSound();}
+screen.addEventListener('pointerdown',e=>{if(e.isPrimary!==false&&e.button===0)puzzleClickSound();},true);
+screen.addEventListener('click',e=>{if(e.detail===0)puzzleClickSound();},true);
+screen.addEventListener('keydown',e=>{if(!e.repeat&&(e.key==='Enter'||e.key===' ')&&e.target.matches('.pz-target'))puzzleClickSound();},true);
 function labels(){el('pz-instruction').textContent=ms()?'Seret kepingan ke tempatnya, atau tekan kepingan kemudian tekan ruang yang sepadan.':'Drag each piece into place, or tap a piece then its matching space.';el('pz-home').textContent=ms()?'Kembali ke Utama 🏠':'Back to Home 🏠';el('pz-retry').textContent=ms()?'Cuba lagi':'Try again';}
 function status(){el('pz-status').textContent=done+' / 6 '+(ms()?'kepingan siap':'pieces placed');}
 function cancelDrag(){if(drag){drag.ghost.remove();drag=null;}}
-function stop(){if(puzzleSpeech&&'speechSynthesis'in window)speechSynthesis.cancel();puzzleSpeech=null;session++;clearTimeout(timer);clearTimeout(loadingTimer);cancelDrag();selected=null;busy=true;el('pz-pop').hidden=true;}
+function stop(){if(screen.classList.contains('active'))window.speechSynthesis?.cancel();session++;clearTimeout(timer);clearTimeout(loadingTimer);cancelDrag();selected=null;busy=true;el('pz-pop').hidden=true;}
 el('pz-home').onclick=()=>{stop();showScreen('home-screen');};
 const priorShow=window.showScreen;
 window.showScreen=function(id){if(id!=='puzzle-screen'&&screen.classList.contains('active'))stop();return priorShow.apply(this,arguments);};
@@ -13796,7 +13792,7 @@ function build(){
  const he=Array.from({length:3},(_,r)=>Array.from({length:3},(_,c)=>edge(v[r][c],v[r][c+1],r===1?amp*(c%2?1:-1):0)));
  const ve=Array.from({length:2},(_,r)=>Array.from({length:4},(_,c)=>edge(v[r][c],v[r+1][c],c>0&&c<3?amp*((r+c)%2?1:-1):0)));
  const board=svg('svg',{viewBox:`0 0 ${W} ${H}`,'aria-label':ms()?'Papan puzzle':'Puzzle board'}),defs=svg('defs');board.appendChild(defs);
- board.appendChild(svg('image',{href:imageURL,width:W,height:H,opacity:1,preserveAspectRatio:'none'}));
+ board.appendChild(svg('image',{href:imageURL,width:W,height:H,opacity:.16,preserveAspectRatio:'none'}));
  for(let r=0;r<2;r++)for(let c=0;c<3;c++){
   const id=r*3+c,vertices=[v[r][c],v[r][c+1],v[r+1][c+1],v[r+1][c]];
   const d='M '+v[r][c].join(' ')+' '+commands(he[r][c],false)+' '+commands(ve[r][c+1],false)+' '+commands(he[r+1][c],true)+' '+commands(ve[r][c],true)+' Z';
@@ -13805,7 +13801,7 @@ function build(){
   const target=svg('path',{d,class:'pz-target',role:'button',tabindex:0,'aria-label':(ms()?'Ruang ':'Space ')+(id+1)});board.appendChild(target);
   const pad=amp*1.6,minX=Math.max(0,Math.min(...vertices.map(v=>v[0]))-pad),minY=Math.max(0,Math.min(...vertices.map(v=>v[1]))-pad),maxX=Math.min(W,Math.max(...vertices.map(v=>v[0]))+pad),maxY=Math.min(H,Math.max(...vertices.map(v=>v[1]))+pad);
   const piece={id,d,clipId,placed,target,x:minX,y:minY,w:maxX-minX,h:maxY-minY,placedOK:false};pieces.push(piece);
-  target.onclick=()=>{if(selected!==null)attempt(selected,id);};target.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();playClickSound();target.onclick();}};
+  target.onclick=()=>{if(selected!==null)attempt(selected,id);};target.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();target.onclick();}};
  }
  el('pz-board').appendChild(board);
  shuffle(pieces).forEach(p=>{
@@ -13841,30 +13837,21 @@ function endDrag(e){
 }
 function attempt(pieceId,spaceId){
  if(busy||selected===null)return;const p=pieces[pieceId];if(p.placedOK)return;
- if(pieceId!==spaceId){el('pz-status').textContent=ms()?'Cuba ruang lain. Kamu boleh!':'Try another space. You can do it!';return;}
+ if(pieceId!==spaceId){if(typeof playWrongSound==='function')playWrongSound();el('pz-status').textContent=ms()?'Cuba ruang lain. Kamu boleh!':'Try another space. You can do it!';return;}
  p.placedOK=true;p.placed.setAttribute('visibility','visible');p.target.style.display='none';p.button.disabled=true;p.button.classList.remove('pz-selected');p.button.setAttribute('aria-pressed','false');selected=null;done++;status();
+ if(typeof playCorrectSound==='function')playCorrectSound();
  if(done===6)complete();
 }
-let puzzleSpeech=null;
-function announcePuzzle(text,next){
- const token=session,started=Date.now();let finished=false;
- const finish=()=>{if(finished)return;finished=true;clearTimeout(timer);puzzleSpeech=null;
-  if(token!==session||!screen.classList.contains('active'))return;
-  timer=setTimeout(()=>{if(token===session&&screen.classList.contains('active'))next();},Math.max(0,2000-(Date.now()-started)));
- };
- try{puzzleSpeech=text==='All done'?announceAllDone():speakAppFeedback(text);
-  if(puzzleSpeech){puzzleSpeech.onend=finish;puzzleSpeech.onerror=finish;timer=setTimeout(finish,8000);}
-  else finish();
- }catch(e){finish();}
-}
+function sayExcellent(){speakAppFeedback('Excellent!');}
 function popup(text){el('pz-pop-title').textContent=text;el('pz-pop').hidden=false;}
 function complete(){
- busy=true;popup('Excellent!');
- announcePuzzle('Excellent',()=>{
+ busy=true;const token=session;popup('Excellent!');sayExcellent();
+ timer=setTimeout(()=>{
+  if(token!==session||!screen.classList.contains('active'))return;
   el('pz-pop').hidden=true;
   if(round<9){round++;loadRound();}
-  else{popup('All Done!');announcePuzzle('All done',()=>{stop();showScreen('home-screen');});}
- });
+  else{popup('All Done!');announceAllDone();timer=setTimeout(()=>{if(token!==session||!screen.classList.contains('active'))return;stop();showScreen('home-screen');},2000);}
+ },2000);
 }
 window.addEventListener('resize',cancelDrag);
 })();
