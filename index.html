@@ -5372,6 +5372,9 @@
                     <button class="topic-btn" type="button" onclick="playClickSound(); openPuzzleModule()" aria-label="Puzzle">
                         <img src="https://i.imgur.com/yNsicoc.jpeg" alt="Puzzle">
                     </button>
+                    <button class="topic-btn" type="button" onclick="playClickSound(); openSpaceAdventure()" aria-label="Space Adventure">
+                        <img src="https://i.imgur.com/FHCGKYF.jpeg" alt="Space Adventure" onerror="var s=document.createElement('span');s.className='spx-home-fallback';s.textContent='🚀 Space Adventure';this.replaceWith(s);">
+                    </button>
                 </div>
             </div>
 
@@ -13857,6 +13860,740 @@ window.addEventListener('resize',cancelDrag);
 })();
 </script>
 <!-- END PUZZLE MODULE -->
+
+<!-- SPACE ADVENTURE MODULE: self-contained (namespaced #space-screen / .spx-*); existing modules are unchanged. -->
+<style>
+#space-screen{--spx-navy:#0b1033;--spx-purple:#2a1458;--spx-violet:#6b3fd1;--spx-gold:#ffd54a;--spx-pink:#ff86d9;--spx-cyan:#7fe7ff;--spx-text:#f6f3ff;--spx-muted:#cfc6f3;
+ position:relative;overflow:hidden;padding:clamp(12px,2.6vw,24px);border-radius:28px;color:var(--spx-text);text-align:center;
+ background:radial-gradient(ellipse at 18% 8%,#4a2a8c 0%,transparent 55%),radial-gradient(ellipse at 88% 92%,#1c3c8f 0%,transparent 55%),linear-gradient(160deg,#1a0b40 0%,#0b1033 58%,#140a33 100%);
+ box-shadow:0 14px 40px rgba(10,5,40,.45);border:3px solid rgba(255,255,255,.18);font-family:'Quicksand',sans-serif;font-weight:700}
+#space-screen::before,#space-screen::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:0}
+#space-screen::before{background-image:radial-gradient(1.6px 1.6px at 12% 18%,#fff 50%,transparent 51%),radial-gradient(1.2px 1.2px at 32% 72%,#fff 50%,transparent 51%),radial-gradient(1.8px 1.8px at 58% 12%,#fff 50%,transparent 51%),radial-gradient(1.3px 1.3px at 78% 46%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 90% 80%,#fff 50%,transparent 51%),radial-gradient(1.1px 1.1px at 46% 40%,#fff 50%,transparent 51%);background-size:260px 260px;animation:spx-twinkle 5s ease-in-out infinite}
+#space-screen::after{background-image:radial-gradient(1.2px 1.2px at 22% 38%,#e9dcff 50%,transparent 51%),radial-gradient(1.6px 1.6px at 66% 64%,#cfe9ff 50%,transparent 51%),radial-gradient(1.1px 1.1px at 84% 14%,#fff 50%,transparent 51%),radial-gradient(1.4px 1.4px at 8% 86%,#fff 50%,transparent 51%);background-size:190px 190px;animation:spx-twinkle 7s ease-in-out 2.5s infinite}
+#space-screen>*{position:relative;z-index:1}
+@keyframes spx-twinkle{0%,100%{opacity:.85}50%{opacity:.3}}
+#space-screen [hidden]{display:none!important}
+#space-screen .spx-defs{position:absolute;width:0;height:0;overflow:hidden}
+#space-screen button{font-family:inherit;min-width:44px;min-height:44px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#space-screen button:focus-visible{outline:4px solid var(--spx-gold);outline-offset:3px}
+#space-screen .spx-topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+#space-screen .spx-topbar-right{display:flex;gap:8px;align-items:center}
+#space-screen .spx-pill-btn{border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:8px 14px;font-size:1rem;font-weight:800;transition:background .15s,transform .1s}
+#space-screen .spx-pill-btn:hover{background:rgba(255,255,255,.22)}
+#space-screen .spx-pill-btn:active{transform:scale(.96)}
+#space-screen .spx-lang{display:flex;border:2px solid rgba(255,255,255,.35);border-radius:999px;overflow:hidden;background:rgba(255,255,255,.08)}
+#space-screen .spx-lang button{border:0;background:transparent;color:#fff;font-weight:900;font-size:1rem;padding:0 14px}
+#space-screen .spx-lang button[aria-pressed="true"]{background:var(--spx-gold);color:#3a1d00}
+#space-screen .spx-sound{font-size:1.3rem;padding:6px 10px}
+#space-screen .spx-kicker{font-family:'Fredoka One',cursive;letter-spacing:.06em;color:var(--spx-gold);font-size:clamp(.95rem,3vw,1.15rem);margin:2px 0 0;text-transform:uppercase}
+#space-screen h2.spx-title{font-family:'Fredoka One',cursive;font-weight:400;color:#fff;font-size:clamp(1.7rem,6vw,2.6rem);margin:2px 0 6px;text-shadow:0 3px 0 rgba(60,20,120,.7),0 0 18px rgba(160,120,255,.6);outline:none}
+#space-screen .spx-sub{color:var(--spx-muted);font-size:clamp(.95rem,3vw,1.1rem);margin:0 0 10px}
+#space-screen .spx-instruction{display:inline-block;background:linear-gradient(90deg,#ff86d9,#8a6bff);color:#fff;border-radius:999px;padding:9px 18px;font-size:clamp(1.05rem,3.8vw,1.35rem);font-weight:900;box-shadow:0 4px 0 rgba(40,10,90,.6);margin:4px 0 12px}
+/* Solar System map */
+#space-screen .spx-map-wrap{position:relative;width:min(100%,max(320px,calc(100vh - 250px)));margin:0 auto;border-radius:24px;background:radial-gradient(circle at 50% 50%,rgba(255,190,80,.16) 0%,rgba(40,20,100,.35) 40%,rgba(5,8,30,.55) 100%);border:2px solid rgba(255,255,255,.18);box-shadow:inset 0 0 40px rgba(0,0,0,.45)}
+#space-screen .spx-map{display:block;width:100%;height:auto;aspect-ratio:1/1;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+#space-screen .spx-map.spx-zoomed{touch-action:none;cursor:grab}
+#space-screen .spx-map.spx-panning{cursor:grabbing}
+#space-screen .spx-orbit{fill:none;stroke:rgba(200,215,255,.5);stroke-width:2.6}
+#space-screen .spx-star{fill:#fff;animation:spx-twinkle 4s ease-in-out infinite}
+#space-screen .spx-sun-glow{transform-box:fill-box;transform-origin:center;animation:spx-glow 4.5s ease-in-out infinite}
+@keyframes spx-glow{0%,100%{opacity:.75;transform:scale(1)}50%{opacity:1;transform:scale(1.06)}}
+#space-screen .spx-planet{cursor:pointer;outline:none}
+#space-screen .spx-hit{fill:transparent}
+#space-screen .spx-ring{fill:none;stroke:rgba(255,255,255,0);stroke-width:4;transition:stroke .15s}
+#space-screen .spx-planet:hover .spx-ring{stroke:rgba(255,255,255,.55)}
+#space-screen .spx-planet:focus-visible .spx-ring{stroke:var(--spx-gold);stroke-width:6}
+#space-screen .spx-planet:active .spx-ring{stroke:var(--spx-gold)}
+#space-screen .spx-label{font-family:'Fredoka One','Quicksand',sans-serif;font-size:34px;fill:#fff;text-anchor:middle;paint-order:stroke;stroke:#14093a;stroke-width:7px;stroke-linejoin:round;pointer-events:none}
+#space-screen .spx-sun-label{font-family:'Fredoka One','Quicksand',sans-serif;font-size:30px;fill:#7a3300;text-anchor:middle;pointer-events:none}
+#space-screen .spx-map-controls{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+#space-screen .spx-map-controls button{width:44px;height:44px;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(20,10,60,.75);color:#fff;font-size:1.4rem;font-weight:900;line-height:1;padding:0}
+#space-screen .spx-map-controls button:disabled{opacity:.4;cursor:default}
+#space-screen .spx-fit{position:absolute;left:8px;bottom:8px;border-radius:14px;border:2px solid rgba(255,255,255,.4);background:rgba(20,10,60,.75);color:#fff;font-size:.95rem;font-weight:800;padding:6px 12px}
+#space-screen .spx-note{color:var(--spx-muted);font-size:.9rem;margin:10px auto 2px;max-width:560px;line-height:1.35}
+#space-screen .spx-chip-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:14px 0 6px}
+#space-screen .spx-chip{display:flex;align-items:center;gap:6px;border:2px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;border-radius:999px;padding:4px 12px 4px 6px;font-size:1rem;font-weight:800}
+#space-screen .spx-chip:hover{background:rgba(255,255,255,.2)}
+#space-screen .spx-chip svg{width:32px;height:32px;flex:none}
+#space-screen .spx-chip .spx-chip-n{font-size:.75rem;color:var(--spx-gold);font-weight:900}
+#space-screen .spx-main-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:22px;padding:14px 26px;margin:12px 6px 4px;font-family:'Fredoka One',cursive;font-size:clamp(1.15rem,4.2vw,1.45rem);color:#3a1d00;background:linear-gradient(180deg,#ffe27a,#ffbf2f);box-shadow:0 6px 0 #c77d00,0 10px 22px rgba(0,0,0,.3);transition:transform .1s,box-shadow .1s}
+#space-screen .spx-main-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #c77d00,0 6px 12px rgba(0,0,0,.3)}
+#space-screen .spx-main-btn.spx-alt{color:#fff;background:linear-gradient(180deg,#9b7bff,#6a43d6);box-shadow:0 6px 0 #3e1f97,0 10px 22px rgba(0,0,0,.3)}
+#space-screen .spx-main-btn.spx-alt:active{box-shadow:0 2px 0 #3e1f97,0 6px 12px rgba(0,0,0,.3)}
+/* Planet Explorer */
+#space-screen .spx-name-sub{font-size:1.05rem;color:var(--spx-muted);margin:-2px 0 6px}
+#space-screen .spx-order{display:inline-block;background:rgba(127,231,255,.16);border:2px solid rgba(127,231,255,.5);color:#dff8ff;border-radius:999px;padding:5px 14px;font-size:1rem}
+#space-screen .spx-hero{display:flex;align-items:flex-end;justify-content:center;gap:clamp(14px,5vw,40px);margin:14px 0 4px;flex-wrap:wrap}
+#space-screen .spx-hero figure{margin:0;display:flex;flex-direction:column;align-items:center;gap:6px}
+#space-screen .spx-hero figcaption{font-size:1rem;color:#fff}
+#space-screen .spx-hero-planet svg{width:clamp(130px,38vw,190px);height:clamp(130px,38vw,190px);filter:drop-shadow(0 0 18px rgba(160,140,255,.45));animation:spx-float 6s ease-in-out infinite}
+#space-screen .spx-hero-sun svg{width:clamp(80px,22vw,110px);height:clamp(80px,22vw,110px)}
+@keyframes spx-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+#space-screen .spx-tag{display:inline-block;font-size:.85rem;font-weight:800;border-radius:999px;padding:4px 12px;margin:0 0 8px}
+#space-screen .spx-tag-illus{background:rgba(255,255,255,.12);color:var(--spx-muted);border:1px dashed rgba(255,255,255,.4)}
+#space-screen .spx-tag-scale{background:#ffd54a;color:#3a1d00}
+#space-screen .spx-tag-zoom{background:#ff86d9;color:#3d0030}
+#space-screen .spx-section{background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.16);border-radius:22px;padding:clamp(12px,3vw,20px);margin:16px 0 0}
+#space-screen h3.spx-h3{font-family:'Fredoka One',cursive;font-weight:400;font-size:clamp(1.3rem,4.6vw,1.7rem);color:var(--spx-gold);margin:0 0 10px}
+#space-screen .spx-compare{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;align-items:stretch}
+#space-screen .spx-compare figure{margin:0;background:rgba(5,8,30,.45);border-radius:18px;padding:10px;display:flex;flex-direction:column;align-items:center}
+#space-screen .spx-compare figure.spx-scale-fig{border:3px solid #ffd54a}
+#space-screen .spx-compare figure.spx-zoom-fig{border:3px dashed #ff86d9}
+#space-screen .spx-compare svg{width:100%;height:auto;display:block}
+#space-screen #spx-zoom-svg,#space-screen #spx-scale-svg{width:100%;display:flex;justify-content:center}
+#space-screen .spx-zoom-fig svg{width:min(150px,80%)}
+#space-screen .spx-compare figcaption{font-size:.95rem;color:#fff;margin-top:6px;line-height:1.35}
+#space-screen .spx-ratio{font-size:clamp(1.15rem,4.2vw,1.45rem);color:#fff;background:linear-gradient(90deg,rgba(255,134,217,.25),rgba(127,231,255,.2));border-radius:16px;padding:12px 14px;margin:12px 0 4px;line-height:1.4}
+#space-screen .spx-ratio strong{color:var(--spx-gold)}
+#space-screen .spx-diam{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:8px;font-size:1rem}
+#space-screen .spx-diam span{background:rgba(255,255,255,.1);border-radius:12px;padding:6px 10px}
+#space-screen .spx-facts{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:10px;text-align:left}
+#space-screen .spx-facts li{display:flex;gap:10px;align-items:flex-start;background:rgba(255,255,255,.95);color:#2b1a5a;border-radius:18px;padding:12px 14px;font-size:clamp(1.02rem,3.4vw,1.15rem);line-height:1.4;box-shadow:0 4px 0 rgba(40,10,90,.45)}
+#space-screen .spx-facts li b{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#9b7bff,#6a43d6);color:#fff;font-family:'Fredoka One',cursive;font-weight:400}
+/* Quiz */
+#space-screen .spx-progress{display:inline-block;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.3);border-radius:999px;padding:7px 16px;font-size:1.1rem;font-weight:900}
+#space-screen .spx-dots{display:flex;justify-content:center;gap:8px;margin:10px 0 4px}
+#space-screen .spx-dots i{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.22);border:2px solid rgba(255,255,255,.4)}
+#space-screen .spx-dots i.spx-done{background:#5be38a;border-color:#5be38a}
+#space-screen .spx-dots i.spx-now{background:var(--spx-gold);border-color:#fff;transform:scale(1.15)}
+#space-screen .spx-question{background:rgba(255,255,255,.96);color:#2b1a5a;border-radius:22px;padding:clamp(16px,4vw,24px);margin:12px 0;font-size:clamp(1.25rem,4.6vw,1.75rem);line-height:1.35;font-family:'Fredoka One',cursive;font-weight:400;box-shadow:0 6px 0 rgba(40,10,90,.5);outline:none}
+#space-screen .spx-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#space-screen .spx-option{display:flex;align-items:center;gap:10px;text-align:left;min-height:64px;border:3px solid rgba(255,255,255,.5);border-radius:18px;padding:10px 14px;background:linear-gradient(180deg,#5c3bc7,#3f249a);color:#fff;font-size:clamp(1.05rem,3.8vw,1.3rem);font-weight:800;line-height:1.3;box-shadow:0 5px 0 #24125e;transition:transform .1s,box-shadow .1s,background .15s}
+#space-screen .spx-option:not(:disabled):hover{background:linear-gradient(180deg,#6d4be0,#4a2bb2)}
+#space-screen .spx-option:not(:disabled):active{transform:translateY(3px);box-shadow:0 2px 0 #24125e}
+#space-screen .spx-option .spx-letter{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2);font-family:'Fredoka One',cursive;font-weight:400}
+#space-screen .spx-option.spx-wrong{background:#6b5a8a;border-color:#ff9a9a;opacity:.6;cursor:not-allowed;box-shadow:none}
+#space-screen .spx-option.spx-correct{background:linear-gradient(180deg,#4fe07f,#20a653);border-color:#eaffef;box-shadow:0 0 0 4px rgba(91,227,138,.45),0 5px 0 #11672f;opacity:1}
+#space-screen .spx-option:disabled{cursor:default}
+#space-screen .spx-shake{animation:spx-shake .4s ease}
+@keyframes spx-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+#space-screen .spx-feedback{min-height:44px;margin:12px 0 0;font-size:clamp(1.15rem,4.2vw,1.45rem);font-weight:900;color:#ffb8d9}
+@media (max-width:540px){#space-screen .spx-options{grid-template-columns:1fr}#space-screen .spx-compare{grid-template-columns:1fr}#space-screen .spx-pill-btn{font-size:.92rem;padding:7px 11px}#space-screen .spx-main-btn{width:100%;margin:10px 0 2px}}
+/* Popup (outside the card so the card's entry animation cannot offset it) */
+#spx-pop[hidden]{display:none!important}
+#spx-pop{position:fixed;inset:0;z-index:100010;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(12,6,40,.6);pointer-events:auto}
+#spx-pop .spx-pop-card{width:min(420px,100%);background:radial-gradient(circle at 50% 0%,#5a35c9 0%,#24105e 70%);border:6px solid #ffd54a;border-radius:32px;padding:26px 18px 30px;text-align:center;box-shadow:0 0 0 6px rgba(255,213,74,.25),0 24px 80px rgba(10,4,40,.7);animation:spx-pop-in .35s cubic-bezier(.2,1.6,.5,1)}
+#spx-pop .spx-pop-icon{font-size:3.2rem;line-height:1}
+#spx-pop .spx-pop-title{font-family:'Fredoka One',cursive;font-size:clamp(2.2rem,9vw,3.5rem);color:#ffd54a;margin:10px 0 0;text-shadow:0 3px 0 #6a2fb3}
+@keyframes spx-pop-in{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.spx-home-fallback{display:flex;align-items:center;justify-content:center;width:100%;height:100%;padding:10px;border-radius:17px;background:linear-gradient(160deg,#2a1458,#0b1033);color:#fff;font-family:'Fredoka One',cursive;font-size:1.1rem;text-align:center}
+@media (prefers-reduced-motion:reduce){#space-screen *,#space-screen::before,#space-screen::after,#spx-pop *{animation:none!important;transition:none!important}}
+</style>
+<script>
+(function(){
+'use strict';
+
+/* ---------- DATA: planets ---------- */
+const SUN={id:'sun',bm:'Matahari',en:'Sun',diameter:1392700};
+const PLANETS=[
+ {id:'mercury',bm:'Utarid',en:'Mercury',diameter:4879,ratio:285,orbit:125,size:13,angle:305,labelSide:'above',
+  facts:[['Utarid ialah planet paling dekat dengan Matahari.','Mercury is the closest planet to the Sun.'],
+   ['Utarid ialah planet paling kecil dalam Sistem Suria.','Mercury is the smallest planet in the Solar System.'],
+   ['Satu tahun di Utarid mengambil masa kira-kira 88 hari Bumi.','A year on Mercury lasts about 88 Earth days.'],
+   ['Utarid tidak mempunyai bulan semula jadi.','Mercury has no natural moons.'],
+   ['Suhu siangnya boleh mencapai kira-kira 430°C dan suhu malamnya boleh turun hingga kira-kira −180°C.','Daytime temperatures can reach about 430°C, while nighttime temperatures can fall to about −180°C.']]},
+ {id:'venus',bm:'Zuhrah',en:'Venus',diameter:12104,ratio:115,orbit:172,size:19,angle:145,
+  facts:[['Zuhrah ialah planet kedua dari Matahari.','Venus is the second planet from the Sun.'],
+   ['Zuhrah ialah planet paling panas dalam Sistem Suria.','Venus is the hottest planet in the Solar System.'],
+   ['Saiz Zuhrah hampir sama dengan Bumi.','Venus is nearly the same size as Earth.'],
+   ['Zuhrah berputar dalam arah bertentangan dengan kebanyakan planet.','Venus rotates in the opposite direction to most planets.'],
+   ['Atmosfera tebal Zuhrah memerangkap haba melalui kesan rumah hijau.','Venus’s thick atmosphere traps heat through the greenhouse effect.']]},
+ {id:'earth',bm:'Bumi',en:'Earth',diameter:12742,ratio:109,orbit:218,size:20,angle:25,
+  facts:[['Bumi ialah planet ketiga dari Matahari.','Earth is the third planet from the Sun.'],
+   ['Bumi ialah satu-satunya planet yang diketahui mempunyai kehidupan.','Earth is the only planet known to support life.'],
+   ['Kira-kira 71% permukaan Bumi diliputi air.','Water covers about 71% of Earth’s surface.'],
+   ['Bumi mempunyai satu bulan semula jadi.','Earth has one natural moon.'],
+   ['Satu tahun di Bumi mengambil masa kira-kira 365¼ hari.','A year on Earth lasts about 365¼ days.']]},
+ {id:'mars',bm:'Marikh',en:'Mars',diameter:6779,ratio:205,orbit:262,size:16,angle:215,
+  facts:[['Marikh ialah planet keempat dari Matahari.','Mars is the fourth planet from the Sun.'],
+   ['Marikh dikenali sebagai Planet Merah.','Mars is known as the Red Planet.'],
+   ['Warna kemerahan Marikh datang daripada mineral besi yang berkarat.','Mars gets its reddish colour from rusty iron minerals.'],
+   ['Marikh mempunyai dua bulan, Phobos dan Deimos.','Mars has two moons, Phobos and Deimos.'],
+   ['Marikh mempunyai gunung berapi gergasi bernama Olympus Mons.','Mars has a giant volcano called Olympus Mons.']]},
+ {id:'jupiter',bm:'Musytari',en:'Jupiter',diameter:139820,ratio:10,orbit:312,size:40,angle:95,
+  facts:[['Musytari ialah planet kelima dari Matahari.','Jupiter is the fifth planet from the Sun.'],
+   ['Musytari ialah planet paling besar dalam Sistem Suria.','Jupiter is the largest planet in the Solar System.'],
+   ['Musytari ialah planet gergasi gas.','Jupiter is a gas giant.'],
+   ['Bintik Merah Besar di Musytari ialah ribut gergasi.','Jupiter’s Great Red Spot is a giant storm.'],
+   ['Musytari berputar sekali dalam kira-kira 10 jam.','Jupiter completes one rotation in about 10 hours.']]},
+ {id:'saturn',bm:'Zuhal',en:'Saturn',diameter:116460,ratio:12,orbit:362,size:32,angle:330,noRings:true,
+  facts:[['Zuhal ialah planet keenam dari Matahari.','Saturn is the sixth planet from the Sun.'],
+   ['Zuhal mempunyai sistem cincin yang besar dan jelas.','Saturn has a large and prominent ring system.'],
+   ['Cincin Zuhal terdiri terutamanya daripada ketulan ais, bersama batu dan debu.','Saturn’s rings are made mostly of pieces of ice, along with rock and dust.'],
+   ['Zuhal ialah planet kedua paling besar dalam Sistem Suria.','Saturn is the second-largest planet in the Solar System.'],
+   ['Ketumpatan purata Zuhal lebih rendah daripada ketumpatan air.','Saturn’s average density is lower than that of water.']]},
+ {id:'uranus',bm:'Uranus',en:'Uranus',diameter:50724,ratio:27,orbit:412,size:25,angle:178,
+  facts:[['Uranus ialah planet ketujuh dari Matahari.','Uranus is the seventh planet from the Sun.'],
+   ['Uranus berputar dalam keadaan sangat condong, seolah-olah mengiring.','Uranus rotates with an extreme tilt, almost on its side.'],
+   ['Metana dalam atmosfera membantu memberikan Uranus warna biru kehijauan.','Methane in its atmosphere helps give Uranus its blue-green colour.'],
+   ['Uranus ialah planet gergasi ais.','Uranus is an ice giant.'],
+   ['Uranus mengambil masa kira-kira 84 tahun Bumi untuk mengelilingi Matahari.','Uranus takes about 84 Earth years to orbit the Sun.']]},
+ {id:'neptune',bm:'Neptun',en:'Neptune',diameter:49244,ratio:28,orbit:458,size:24,angle:258,
+  facts:[['Neptun ialah planet kelapan dari Matahari.','Neptune is the eighth planet from the Sun.'],
+   ['Neptun ialah planet paling jauh dari Matahari antara lapan planet.','Neptune is the farthest of the eight planets from the Sun.'],
+   ['Neptun mengambil masa kira-kira 165 tahun Bumi untuk mengelilingi Matahari.','Neptune takes about 165 Earth years to orbit the Sun.'],
+   ['Neptun mempunyai angin yang boleh melebihi 2,000 km/j.','Neptune has winds that can exceed 2,000 km/h.'],
+   ['Triton ialah bulan terbesar Neptun.','Triton is Neptune’s largest moon.']]}
+].map(p=>Object.assign(p,{facts:p.facts.map(([bm,en])=>({bm,en}))}));
+const PLANET_BY_ID=Object.fromEntries(PLANETS.map(p=>[p.id,p]));
+
+/* ---------- DATA: translations ---------- */
+const ORD_EN=['1st','2nd','3rd','4th','5th','6th','7th','8th'];
+const T={
+ bm:{module:'Pengembaraan Angkasa',solar:'Sistem Suria',explorer:'Penjelajah Planet',switchPlanet:'Tukar Planet',test:'Uji Pengetahuan Anda',facts:'Fakta Menarik',size:'Perbandingan Saiz',
+  tryAgain:'Cuba Lagi',correct:'Betul!',allDone:'Semua Selesai!',qOf:(n,t)=>`Soalan ${n} daripada ${t}`,back:'Kembali ke Menu',
+  tap:'Tekan planet untuk mula meneroka!',note:'Ilustrasi tidak mengikut skala saiz dan jarak sebenar.',noteLive:'Kedudukan planet dalam gambar ini hanyalah ilustrasi, bukan kedudukan sebenar planet pada masa ini.',
+  zoomIn:'Zum masuk',zoomOut:'Zum keluar',fit:'⤢ Muatkan Semua',fitLabel:'Muatkan seluruh Sistem Suria dalam skrin',
+  soundOn:'Bunyi hidup. Tekan untuk senyapkan.',soundOff:'Bunyi senyap. Tekan untuk hidupkan bunyi.',langGroup:'Pilihan bahasa',
+  mapLabel:'Peta Sistem Suria: Matahari di tengah dan lapan planet pada orbit masing-masing',pickPlanet:'Atau pilih planet di sini:',
+  order:n=>`Planet ke-${n} dari Matahari`,explore:name=>`${name}. Tekan untuk meneroka.`,
+  illus:'Gambar hiasan (tidak mengikut skala)',scaleTag:'📏 Mengikut skala diameter sebenar',zoomTag:'🔍 Paparan diperbesar',
+  scaleCap:'Bulatan putus-putus hanya penanda kedudukan planet.',zoomCap:name=>`${name} dibesarkan supaya mudah dilihat. Bukan mengikut skala.`,
+  ratio:(n,name)=>[`Diameter Matahari kira-kira `,`${n} kali`,` diameter ${name}.`],diameterOf:name=>`Diameter ${name}`,noRings:'tanpa cincin',
+  sizeIntro:'Kita bandingkan DIAMETER (lebar dari tepi ke tepi).',quizIntro:'Pilih jawapan yang betul.',solarBtn:'🪐 Sistem Suria'},
+ en:{module:'Space Adventure',solar:'Solar System',explorer:'Planet Explorer',switchPlanet:'Switch Planet',test:'Test Your Knowledge',facts:'Fun Facts',size:'Size Comparison',
+  tryAgain:'Try Again',correct:'Correct!',allDone:'All Done!',qOf:(n,t)=>`Question ${n} of ${t}`,back:'Back to Menu',
+  tap:'Tap a planet to start exploring!',note:'Illustration not to actual size and distance scale.',noteLive:'Planet positions in this picture are only an illustration, not where the planets are right now.',
+  zoomIn:'Zoom in',zoomOut:'Zoom out',fit:'⤢ Fit All',fitLabel:'Fit the whole Solar System on screen',
+  soundOn:'Sound on. Tap to mute.',soundOff:'Sound muted. Tap to turn sound on.',langGroup:'Language choice',
+  mapLabel:'Solar System map: the Sun in the centre and eight planets on their orbits',pickPlanet:'Or pick a planet here:',
+  order:n=>`${ORD_EN[n-1]} planet from the Sun`,explore:name=>`${name}. Tap to explore.`,
+  illus:'Illustration (not to scale)',scaleTag:'📏 True diameter scale',zoomTag:'🔍 Enlarged view',
+  scaleCap:'The dashed circle only marks where the planet is.',zoomCap:name=>`${name} is enlarged so it is easy to see. Not to scale.`,
+  ratio:(n,name)=>[`The Sun’s diameter is about `,`${n} times`,` ${name}’s diameter.`],diameterOf:name=>`${name}’s diameter`,noRings:'without rings',
+  sizeIntro:'We compare DIAMETER (the width from edge to edge).',quizIntro:'Choose the correct answer.',solarBtn:'🪐 Solar System'}
+};
+
+/* ---------- DATA: 40-question bank (correctOptionId checks answers, never position or text) ---------- */
+const P=id=>({planet:id});
+const O=(bm,en)=>({bm,en});
+const RAW_QUESTIONS=[
+ ['Q01','Planet manakah paling dekat dengan Matahari?','Which planet is closest to the Sun?',[P('mercury'),P('venus'),P('earth'),P('mars')]],
+ ['Q02','Planet manakah paling kecil dalam Sistem Suria?','Which is the smallest planet in the Solar System?',[P('mercury'),P('mars'),P('neptune'),P('earth')]],
+ ['Q03','Berapa lama satu tahun di Utarid?','How long is a year on Mercury?',[O('88 hari Bumi','88 Earth days'),O('365 hari Bumi','365 Earth days'),O('84 tahun Bumi','84 Earth years'),O('165 tahun Bumi','165 Earth years')]],
+ ['Q04','Berapa banyak bulan semula jadi Utarid?','How many natural moons does Mercury have?',[O('Sifar','Zero'),O('Satu','One'),O('Dua','Two'),O('Tiga','Three')]],
+ ['Q05','Bagaimanakah suhu Utarid berubah antara siang dan malam?','How do Mercury’s temperatures change between day and night?',[O('Sangat panas pada siang dan sangat sejuk pada malam','Very hot by day and very cold by night'),O('Sentiasa panas','Always hot'),O('Sentiasa sejuk','Always cold'),O('Hampir sama sepanjang masa','Almost the same all the time')]],
+ ['Q06','Planet manakah berada di tempat kedua dari Matahari?','Which planet is second from the Sun?',[P('venus'),P('earth'),P('mercury'),P('jupiter')]],
+ ['Q07','Planet manakah paling panas dalam Sistem Suria?','Which is the hottest planet in the Solar System?',[P('venus'),P('mercury'),P('mars'),P('saturn')]],
+ ['Q08','Saiz Zuhrah hampir sama dengan planet mana?','Venus is nearly the same size as which planet?',[P('earth'),P('jupiter'),P('mercury'),P('neptune')]],
+ ['Q09','Apakah yang unik tentang arah putaran Zuhrah?','What is unusual about Venus’s rotation?',[O('Bertentangan dengan kebanyakan planet','Opposite to most planets'),O('Tidak berputar','It does not rotate'),O('Sentiasa bertukar arah','It constantly changes direction'),O('Sama seperti semua planet','The same as every planet')]],
+ ['Q10','Apakah yang memerangkap banyak haba di Zuhrah?','What traps so much heat on Venus?',[O('Atmosfera tebalnya','Its thick atmosphere'),O('Cincin aisnya','Its icy rings'),O('Lautannya','Its oceans'),O('Bulannya','Its moon')]],
+ ['Q11','Bumi ialah planet ke berapa dari Matahari?','What is Earth’s position from the Sun?',[O('Ketiga','Third'),O('Pertama','First'),O('Kelima','Fifth'),O('Kelapan','Eighth')]],
+ ['Q12','Planet manakah satu-satunya yang diketahui mempunyai kehidupan?','Which is the only planet known to support life?',[P('earth'),P('mars'),P('venus'),P('uranus')]],
+ ['Q13','Kira-kira berapa peratus permukaan Bumi diliputi air?','About what percentage of Earth’s surface is covered by water?',[O('71%','71%'),O('10%','10%'),O('30%','30%'),O('100%','100%')]],
+ ['Q14','Berapa banyak bulan semula jadi Bumi?','How many natural moons does Earth have?',[O('Satu','One'),O('Sifar','Zero'),O('Dua','Two'),O('Empat','Four')]],
+ ['Q15','Berapa lama Bumi mengambil masa untuk mengelilingi Matahari sekali?','How long does Earth take to orbit the Sun once?',[O('Kira-kira 365¼ hari','About 365¼ days'),O('24 jam','24 hours'),O('88 hari','88 days'),O('10 jam','10 hours')]],
+ ['Q16','Planet manakah berada di tempat keempat dari Matahari?','Which planet is fourth from the Sun?',[P('mars'),P('earth'),P('saturn'),P('venus')]],
+ ['Q17','Apakah gelaran Marikh?','What is Mars’s nickname?',[O('Planet Merah','The Red Planet'),O('Planet Emas','The Golden Planet'),O('Planet Ungu','The Purple Planet'),O('Planet Hijau','The Green Planet')]],
+ ['Q18','Apakah yang memberikan Marikh warna kemerahan?','What gives Mars its reddish colour?',[O('Mineral besi berkarat','Rusty iron minerals'),O('Rumput merah','Red grass'),O('Lautan lava di seluruh permukaan','Lava oceans covering the whole surface'),O('Awan merah','Red clouds')]],
+ ['Q19','Apakah nama dua bulan Marikh?','What are the names of Mars’s two moons?',[O('Phobos dan Deimos','Phobos and Deimos'),O('Titan dan Triton','Titan and Triton'),O('Europa dan Io','Europa and Io'),O('Bumi dan Zuhrah','Earth and Venus')]],
+ ['Q20','Apakah nama gunung berapi gergasi di Marikh?','What is the name of the giant volcano on Mars?',[O('Olympus Mons','Olympus Mons'),O('Everest','Everest'),O('Fuji','Fuji'),O('Kilimanjaro','Kilimanjaro')]],
+ ['Q21','Planet manakah berada di tempat kelima dari Matahari?','Which planet is fifth from the Sun?',[P('jupiter'),P('mars'),P('saturn'),P('neptune')]],
+ ['Q22','Planet manakah paling besar dalam Sistem Suria?','Which is the largest planet in the Solar System?',[P('jupiter'),P('earth'),P('saturn'),P('uranus')]],
+ ['Q23','Musytari tergolong dalam kategori apa?','What type of planet is Jupiter?',[O('Gergasi gas','Gas giant'),O('Planet batuan','Rocky planet'),O('Planet kerdil','Dwarf planet'),O('Bintang','Star')]],
+ ['Q24','Apakah Bintik Merah Besar di Musytari?','What is Jupiter’s Great Red Spot?',[O('Ribut gergasi','A giant storm'),O('Gunung berapi','A volcano'),O('Lautan','An ocean'),O('Kawah','A crater')]],
+ ['Q25','Kira-kira berapa lama Musytari mengambil masa untuk berputar sekali?','About how long does Jupiter take to complete one rotation?',[O('10 jam','10 hours'),O('365 hari','365 days'),O('84 tahun','84 years'),O('88 hari','88 days')]],
+ ['Q26','Planet manakah berada di tempat keenam dari Matahari?','Which planet is sixth from the Sun?',[P('saturn'),P('jupiter'),P('uranus'),P('mars')]],
+ ['Q27','Planet manakah terkenal dengan sistem cincin yang besar dan jelas?','Which planet is famous for its large and prominent ring system?',[P('saturn'),P('mercury'),P('earth'),P('venus')]],
+ ['Q28','Cincin Zuhal terdiri terutamanya daripada apa?','What are Saturn’s rings mostly made of?',[O('Ketulan ais','Pieces of ice'),O('Kayu','Wood'),O('Awan air','Water clouds'),O('Api','Fire')]],
+ ['Q29','Planet manakah kedua paling besar dalam Sistem Suria?','Which is the second-largest planet in the Solar System?',[P('saturn'),P('earth'),P('neptune'),P('mars')]],
+ ['Q30','Bagaimanakah ketumpatan purata Zuhal berbanding air?','How does Saturn’s average density compare with water?',[O('Lebih rendah','Lower'),O('Sama','The same'),O('Dua kali lebih tinggi','Twice as high'),O('Sepuluh kali lebih tinggi','Ten times as high')]],
+ ['Q31','Planet manakah berada di tempat ketujuh dari Matahari?','Which planet is seventh from the Sun?',[P('uranus'),P('saturn'),P('neptune'),P('jupiter')]],
+ ['Q32','Planet manakah berputar hampir dalam keadaan mengiring?','Which planet rotates almost on its side?',[P('uranus'),P('earth'),P('mars'),P('mercury')]],
+ ['Q33','Gas manakah membantu memberikan Uranus warna biru kehijauan?','Which gas helps give Uranus its blue-green colour?',[O('Metana','Methane'),O('Oksigen','Oxygen'),O('Karbon dioksida','Carbon dioxide'),O('Nitrogen','Nitrogen')]],
+ ['Q34','Uranus tergolong dalam kategori apa?','What type of planet is Uranus?',[O('Gergasi ais','Ice giant'),O('Planet batuan','Rocky planet'),O('Bintang','Star'),O('Planet kerdil','Dwarf planet')]],
+ ['Q35','Berapa lama satu tahun di Uranus?','How long is a year on Uranus?',[O('Kira-kira 84 tahun Bumi','About 84 Earth years'),O('88 hari Bumi','88 Earth days'),O('Satu tahun Bumi','One Earth year'),O('165 tahun Bumi','165 Earth years')]],
+ ['Q36','Neptun ialah planet ke berapa dari Matahari?','What is Neptune’s position from the Sun?',[O('Kelapan','Eighth'),O('Kedua','Second'),O('Keempat','Fourth'),O('Keenam','Sixth')]],
+ ['Q37','Antara lapan planet, yang manakah paling jauh dari Matahari?','Which of the eight planets is farthest from the Sun?',[P('neptune'),P('uranus'),P('saturn'),P('jupiter')]],
+ ['Q38','Berapa lama satu tahun di Neptun?','How long is a year on Neptune?',[O('Kira-kira 165 tahun Bumi','About 165 Earth years'),O('84 tahun Bumi','84 Earth years'),O('365 hari Bumi','365 Earth days'),O('88 hari Bumi','88 Earth days')]],
+ ['Q39','Kelajuan angin di Neptun boleh melebihi berapa?','What speed can Neptune’s winds exceed?',[O('2,000 km/j','2,000 km/h'),O('20 km/j','20 km/h'),O('100 km/j','100 km/h'),O('200 km/j','200 km/h')]],
+ ['Q40','Apakah nama bulan terbesar Neptun?','What is Neptune’s largest moon called?',[O('Triton','Triton'),O('Titan','Titan'),O('Phobos','Phobos'),O('Deimos','Deimos')]]
+];
+// Source lists the correct answer first; display order is shuffled per session.
+const QUESTIONS=RAW_QUESTIONS.map(([id,bm,en,opts])=>{
+ const options=opts.map((o,i)=>{const p=o.planet&&PLANET_BY_ID[o.planet];return {id:id+'-'+'abcd'[i],bm:p?p.bm:o.bm,en:p?p.en:o.en};});
+ return {id,bm,en,options,correctOptionId:options[0].id};
+});
+const QUESTION_BY_ID=Object.fromEntries(QUESTIONS.map(q=>[q.id,q]));
+const ALL_QIDS=QUESTIONS.map(q=>q.id);
+const SESSION_SIZE=5;
+
+/* ---------- Storage (localStorage with in-memory fallback) ---------- */
+const store=(()=>{
+ const mem={};let ok=false;
+ try{const k='__spx_test';localStorage.setItem(k,'1');localStorage.removeItem(k);ok=true;}catch(e){}
+ return {
+  get(k){if(ok){try{const v=localStorage.getItem(k);if(v!==null)return JSON.parse(v);}catch(e){}}return Object.prototype.hasOwnProperty.call(mem,k)?mem[k]:null;},
+  set(k,v){mem[k]=v;if(ok){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){ok=false;}}}
+ };
+})();
+const LANG_KEY='kiddora.space.lang',MUTE_KEY='kiddora.space.muted';
+const quizKey=()=>'kiddora.space.quiz.v1:'+(window.activeProfile||'default');
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ---------- quizState: shuffled deck so no question repeats until all 40 are used ---------- */
+const quizState={
+ load(){
+  const s=store.get(quizKey());const fresh={deck:[],lastSession:[],session:null,completedSessions:0};
+  if(!s||typeof s!=='object')return fresh;
+  const valid=id=>Object.prototype.hasOwnProperty.call(QUESTION_BY_ID,id);
+  const uniq=a=>Array.isArray(a)&&new Set(a).size===a.length&&a.every(valid);
+  const out={deck:uniq(s.deck)?s.deck.slice():[],lastSession:uniq(s.lastSession)?s.lastSession.slice():[],session:null,completedSessions:Number(s.completedSessions)||0};
+  const ss=s.session;
+  if(ss&&uniq(ss.ids)&&ss.ids.length===SESSION_SIZE&&ss.order&&typeof ss.order==='object'&&ss.ids.every(id=>{
+   const o=ss.order[id],ids=QUESTION_BY_ID[id].options.map(x=>x.id);return Array.isArray(o)&&o.length===4&&ids.every(x=>o.includes(x));})){
+   const answered={},wrong={};
+   for(const id of ss.ids){
+    const a=ss.answered&&ss.answered[id];if(a===QUESTION_BY_ID[id].correctOptionId)answered[id]=a;
+    const w=ss.wrong&&Array.isArray(ss.wrong[id])?ss.wrong[id].filter(x=>ss.order[id].includes(x)&&x!==QUESTION_BY_ID[id].correctOptionId):[];if(w.length)wrong[id]=w;
+   }
+   // answers are recorded strictly in order; ignore anything inconsistent
+   let n=0;while(n<SESSION_SIZE&&answered[ss.ids[n]])n++;
+   ss.ids.slice(n).forEach(id=>delete answered[id]);
+   if(n<SESSION_SIZE){out.session={ids:ss.ids.slice(),order:ss.order,answered,wrong};out.deck=out.deck.filter(id=>!ss.ids.includes(id));}
+  }
+  return out;
+ },
+ save(s){store.set(quizKey(),s);},
+ buildDeck(last){
+  const deck=shuffle(ALL_QIDS),avoid=new Set(last||[]);
+  // first session of a new round must not overlap the previous session
+  for(let i=0;i<SESSION_SIZE;i++){
+   if(!avoid.has(deck[i]))continue;
+   const j=deck.findIndex((id,k)=>k>=SESSION_SIZE&&!avoid.has(id));
+   if(j>=0)[deck[i],deck[j]]=[deck[j],deck[i]];
+  }
+  return deck;
+ },
+ // Returns the unfinished session if there is one, otherwise draws 5 fresh IDs from the deck.
+ current(){
+  const s=this.load();
+  if(s.session)return {state:s,session:s.session};
+  if(s.deck.length<SESSION_SIZE)s.deck=this.buildDeck(s.lastSession);
+  const ids=s.deck.splice(0,SESSION_SIZE),order={};
+  ids.forEach(id=>{order[id]=shuffle(QUESTION_BY_ID[id].options.map(o=>o.id));});
+  s.session={ids,order,answered:{},wrong:{}};
+  this.save(s);
+  return {state:s,session:s.session};
+ }
+};
+
+/* ---------- audioManager ---------- */
+const audioManager={
+ muted:!!store.get(MUTE_KEY),
+ setMuted(m){this.muted=!!m;store.set(MUTE_KEY,this.muted);if(this.muted)this.stop();},
+ click(){if(this.muted)return;try{if(typeof playClickSound==='function')playClickSound();}catch(e){}},
+ wrong(){
+  if(this.muted)return;
+  try{
+   if(typeof playAppSound==='function'){
+    playAppSound(ctx=>{const now=ctx.currentTime,o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(392,now);o.frequency.exponentialRampToValueAtTime(262,now+.28);g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(.16,now+.03);g.gain.exponentialRampToValueAtTime(.0001,now+.32);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+.34);});
+   }else if(typeof playWrongSound==='function')playWrongSound();
+  }catch(e){}
+ },
+ // Same English voice path the app already uses for its spoken feedback.
+ say(text){
+  if(this.muted)return;
+  try{
+   if(typeof speakAppFeedback==='function'){speakAppFeedback(text);return;}
+   if(!('speechSynthesis' in window))return;
+   speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=.8;u.pitch=1.05;
+   const v=speechSynthesis.getVoices().find(x=>/^en[-_]US/i.test(x.lang))||speechSynthesis.getVoices().find(x=>/^en/i.test(x.lang));if(v)u.voice=v;
+   window.spxVoice=u;speechSynthesis.speak(u);
+  }catch(e){}
+ },
+ correct(){if(this.muted)return;try{if(typeof playCorrectSound==='function')playCorrectSound();}catch(e){}this.say('Correct');},
+ allDone(){if(this.muted)return;try{if(typeof announceAllDone==='function'){announceAllDone();return;}}catch(e){}this.say('All done');},
+ stop(){try{window.speechSynthesis&&window.speechSynthesis.cancel();}catch(e){}}
+};
+
+/* ---------- Planet illustrations (inline SVG vectors; shared gradients live in one defs block) ---------- */
+const DEFS=`<svg class="spx-defs" aria-hidden="true" focusable="false"><defs>
+<radialGradient id="spx-g-sun" cx="40%" cy="38%" r="65%"><stop offset="0" stop-color="#fffbe0"/><stop offset=".35" stop-color="#ffe56b"/><stop offset=".72" stop-color="#ffb300"/><stop offset="1" stop-color="#ff7a00"/></radialGradient>
+<radialGradient id="spx-g-glow"><stop offset=".55" stop-color="#ffd25a" stop-opacity=".7"/><stop offset="1" stop-color="#ff8a00" stop-opacity="0"/></radialGradient>
+<radialGradient id="spx-g-mercury" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#e2ddd8"/><stop offset=".6" stop-color="#a39d97"/><stop offset="1" stop-color="#625d58"/></radialGradient>
+<radialGradient id="spx-g-venus" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#fff2c8"/><stop offset=".6" stop-color="#f0c069"/><stop offset="1" stop-color="#b8752e"/></radialGradient>
+<radialGradient id="spx-g-earth" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#92d6ff"/><stop offset=".6" stop-color="#2f80da"/><stop offset="1" stop-color="#123f8f"/></radialGradient>
+<radialGradient id="spx-g-mars" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#ffb487"/><stop offset=".6" stop-color="#df5a2b"/><stop offset="1" stop-color="#8d2a12"/></radialGradient>
+<radialGradient id="spx-g-jupiter" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#f8e6c6"/><stop offset=".6" stop-color="#d9a978"/><stop offset="1" stop-color="#8f5a32"/></radialGradient>
+<radialGradient id="spx-g-saturn" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#fff3cf"/><stop offset=".6" stop-color="#e7c88a"/><stop offset="1" stop-color="#a5804a"/></radialGradient>
+<radialGradient id="spx-g-uranus" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#ddfcff"/><stop offset=".6" stop-color="#80dde8"/><stop offset="1" stop-color="#2c98ad"/></radialGradient>
+<radialGradient id="spx-g-neptune" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#9dbbff"/><stop offset=".6" stop-color="#3d64e0"/><stop offset="1" stop-color="#1a2a8a"/></radialGradient>
+<radialGradient id="spx-g-shade" cx="32%" cy="30%" r="78%"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".42" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000014" stop-opacity=".5"/></radialGradient>
+<clipPath id="spx-clip" clipPathUnits="userSpaceOnUse"><circle r="50"/></clipPath>
+</defs></svg>`;
+const SHADE='<circle r="50" fill="url(#spx-g-shade)"/>';
+const ART={
+ sun:{E:82,body:'<circle class="spx-sun-glow" r="80" fill="url(#spx-g-glow)"/><circle r="50" fill="url(#spx-g-sun)"/><g fill="#ff9d00" opacity=".35"><circle cx="-16" cy="12" r="7"/><circle cx="18" cy="-10" r="5"/><circle cx="10" cy="24" r="4"/></g>'},
+ mercury:{E:50,body:'<circle r="50" fill="url(#spx-g-mercury)"/><g fill="#77726d" opacity=".6"><circle cx="-18" cy="-12" r="9"/><circle cx="16" cy="10" r="12"/><circle cx="-6" cy="25" r="6"/><circle cx="22" cy="-22" r="5"/><circle cx="-30" cy="14" r="4"/></g>'+SHADE},
+ venus:{E:50,body:'<circle r="50" fill="url(#spx-g-venus)"/><g clip-path="url(#spx-clip)" fill="none" stroke="#fff5da" stroke-opacity=".5" stroke-width="7" stroke-linecap="round"><path d="M-55 -20 Q-10 -34 55 -14"/><path d="M-55 6 Q0 -8 55 12"/><path d="M-50 30 Q5 20 50 36"/></g>'+SHADE},
+ earth:{E:50,body:'<circle r="50" fill="url(#spx-g-earth)"/><g clip-path="url(#spx-clip)"><g fill="#4cc36b"><path d="M-30 -38q18 -6 26 8q6 14 -8 20q-14 4 -12 18q2 12 -14 10q-14 -6 -10 -24q2 -20 18 -32z"/><path d="M12 -8q16 -10 30 0q8 14 -2 28q-12 12 -22 2q-10 -12 -6 -30z"/><path d="M-10 36q14 -4 22 6q-8 12 -24 4z"/></g><ellipse cx="0" cy="-49" rx="22" ry="7" fill="#fff"/><ellipse cx="0" cy="49" rx="22" ry="7" fill="#fff"/><g fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="5" stroke-linecap="round"><path d="M-40 -20q14 -6 26 0"/><path d="M10 30q14 -4 26 2"/><path d="M-4 -30q10 -4 20 0"/></g></g>'+SHADE},
+ mars:{E:50,body:'<circle r="50" fill="url(#spx-g-mars)"/><g clip-path="url(#spx-clip)"><g fill="#a3361a" opacity=".55"><ellipse cx="-14" cy="6" rx="20" ry="9"/><ellipse cx="18" cy="-14" rx="12" ry="6"/><ellipse cx="10" cy="26" rx="14" ry="5"/></g><ellipse cx="0" cy="-48" rx="16" ry="7" fill="#fff" opacity=".9"/></g>'+SHADE},
+ jupiter:{E:50,body:'<circle r="50" fill="url(#spx-g-jupiter)"/><g clip-path="url(#spx-clip)"><rect x="-50" y="-38" width="100" height="9" fill="#b9784a" opacity=".75"/><rect x="-50" y="-20" width="100" height="12" fill="#f4e2c2" opacity=".8"/><rect x="-50" y="-6" width="100" height="10" fill="#c48553" opacity=".8"/><rect x="-50" y="8" width="100" height="8" fill="#f1dcb6" opacity=".7"/><rect x="-50" y="20" width="100" height="10" fill="#b06d42" opacity=".75"/><rect x="-50" y="34" width="100" height="6" fill="#e7c59a" opacity=".7"/><ellipse cx="18" cy="17" rx="11" ry="7" fill="#c4452a" stroke="#ec916a" stroke-width="2"/></g>'+SHADE},
+ saturn:{E:110,body:'<g transform="rotate(-14)"><ellipse rx="100" ry="24" fill="none" stroke="#cdb27a" stroke-width="10"/><ellipse rx="80" ry="18" fill="none" stroke="#f0e1b6" stroke-width="7"/><circle r="50" fill="url(#spx-g-saturn)"/><g clip-path="url(#spx-clip)"><rect x="-50" y="-26" width="100" height="8" fill="#c9a768" opacity=".6"/><rect x="-50" y="-6" width="100" height="10" fill="#f6e6bd" opacity=".6"/><rect x="-50" y="14" width="100" height="8" fill="#c39f5f" opacity=".55"/></g>'+SHADE+'<path d="M-100 0A100 24 0 0 0 100 0" fill="none" stroke="#cdb27a" stroke-width="10"/><path d="M-80 0A80 18 0 0 0 80 0" fill="none" stroke="#f0e1b6" stroke-width="7"/></g>'},
+ uranus:{E:80,body:'<ellipse rx="10" ry="74" transform="rotate(8)" fill="none" stroke="#d8ffff" stroke-opacity=".6" stroke-width="3"/><circle r="50" fill="url(#spx-g-uranus)"/><g clip-path="url(#spx-clip)" fill="none" stroke="#e8ffff" stroke-opacity=".3" stroke-width="6"><path d="M-12 -55V55"/><path d="M14 -55V55"/></g>'+SHADE},
+ neptune:{E:50,body:'<circle r="50" fill="url(#spx-g-neptune)"/><g clip-path="url(#spx-clip)"><g fill="none" stroke="#c8d6ff" stroke-opacity=".3" stroke-width="5"><path d="M-55 -18Q0 -26 55 -16"/><path d="M-55 22Q0 14 55 24"/></g><ellipse cx="-12" cy="6" rx="11" ry="6" fill="#142070" opacity=".75"/><path d="M-4 18q12 -4 24 0" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"/></g>'+SHADE}
+};
+// Planet art scaled so the planet body (not rings/glow) has radius r.
+function artAt(id,cx,cy,r){const a=ART[id],w=2*a.E*r/50;return `<svg x="${cx-w/2}" y="${cy-w/2}" width="${w}" height="${w}" viewBox="${-a.E} ${-a.E} ${2*a.E} ${2*a.E}" overflow="visible" aria-hidden="true">${a.body}</svg>`;}
+function artSVG(id,label){const a=ART[id];return `<svg viewBox="${-a.E} ${-a.E} ${2*a.E} ${2*a.E}" role="img" aria-label="${label}" focusable="false">${a.body}</svg>`;}
+function chipSVG(id){const a=ART[id],E=Math.max(a.E,56);return `<svg viewBox="${-E} ${-E} ${2*E} ${2*E}" aria-hidden="true" focusable="false">${a.body}</svg>`;}
+
+/* ---------- Screen + popup ---------- */
+const el=id=>document.getElementById(id);
+const lang=()=>(typeof currentGlobalLang!=='undefined'&&currentGlobalLang==='ms')?'bm':'en';
+const t=()=>T[lang()];
+const other=l=>l==='bm'?'en':'bm';
+const nf=n=>n.toLocaleString('en-US');
+
+const screen=document.createElement('div');screen.id='space-screen';screen.className='card';
+screen.innerHTML=DEFS+`
+<div class="spx-topbar">
+ <button type="button" class="spx-pill-btn" id="spx-home"></button>
+ <div class="spx-topbar-right">
+  <div class="spx-lang" role="group" id="spx-lang"><button type="button" data-lang="bm">BM</button><button type="button" data-lang="en">EN</button></div>
+  <button type="button" class="spx-pill-btn spx-sound" id="spx-sound"></button>
+ </div>
+</div>
+<section id="spx-view-solar" data-view="solar">
+ <p class="spx-kicker" id="spx-solar-kicker"></p>
+ <h2 class="spx-title" id="spx-solar-title" tabindex="-1"></h2>
+ <p class="spx-instruction" id="spx-tap"></p>
+ <div class="spx-map-wrap">
+  <svg class="spx-map" id="spx-map" viewBox="0 0 1000 1000" role="group"></svg>
+  <div class="spx-map-controls"><button type="button" id="spx-zoom-in">+</button><button type="button" id="spx-zoom-out">−</button></div>
+  <button type="button" class="spx-fit" id="spx-fit"></button>
+ </div>
+ <p class="spx-note" id="spx-note"></p>
+ <p class="spx-note" id="spx-note-live"></p>
+ <p class="spx-sub" id="spx-pick" style="margin-top:12px"></p>
+ <div class="spx-chip-row" id="spx-chips"></div>
+ <button type="button" class="spx-main-btn" id="spx-to-quiz"></button>
+</section>
+<section id="spx-view-explorer" data-view="explorer" hidden>
+ <p class="spx-kicker" id="spx-exp-kicker"></p>
+ <h2 class="spx-title" id="spx-exp-title" tabindex="-1"></h2>
+ <p class="spx-name-sub" id="spx-exp-sub"></p>
+ <span class="spx-order" id="spx-exp-order"></span>
+ <div class="spx-hero">
+  <figure class="spx-hero-planet"><div id="spx-hero-planet"></div><figcaption id="spx-hero-planet-cap"></figcaption></figure>
+  <figure class="spx-hero-sun"><div id="spx-hero-sun"></div><figcaption id="spx-hero-sun-cap"></figcaption></figure>
+ </div>
+ <span class="spx-tag spx-tag-illus" id="spx-illus"></span>
+ <div class="spx-section">
+  <h3 class="spx-h3" id="spx-size-title"></h3>
+  <p class="spx-sub" id="spx-size-intro"></p>
+  <div class="spx-compare">
+   <figure class="spx-scale-fig"><span class="spx-tag spx-tag-scale" id="spx-scale-tag"></span><div id="spx-scale-svg"></div><figcaption id="spx-scale-cap"></figcaption></figure>
+   <figure class="spx-zoom-fig"><span class="spx-tag spx-tag-zoom" id="spx-zoom-tag"></span><div id="spx-zoom-svg"></div><figcaption id="spx-zoom-cap"></figcaption></figure>
+  </div>
+  <p class="spx-ratio" id="spx-ratio"></p>
+  <div class="spx-diam" id="spx-diam"></div>
+ </div>
+ <div class="spx-section">
+  <h3 class="spx-h3" id="spx-facts-title"></h3>
+  <ol class="spx-facts" id="spx-facts"></ol>
+ </div>
+ <button type="button" class="spx-main-btn" id="spx-switch"></button>
+ <button type="button" class="spx-main-btn spx-alt" id="spx-exp-quiz"></button>
+</section>
+<section id="spx-view-quiz" data-view="quiz" hidden>
+ <p class="spx-kicker" id="spx-quiz-kicker"></p>
+ <h2 class="spx-title" id="spx-quiz-title" tabindex="-1"></h2>
+ <span class="spx-progress" id="spx-progress"></span>
+ <div class="spx-dots" id="spx-dots" aria-hidden="true"></div>
+ <div class="spx-question" id="spx-question" tabindex="-1"></div>
+ <p class="spx-sub" id="spx-quiz-intro"></p>
+ <div class="spx-options" id="spx-options"></div>
+ <p class="spx-feedback" id="spx-feedback" role="status" aria-live="polite"></p>
+ <button type="button" class="spx-main-btn spx-alt" id="spx-quiz-back"></button>
+</section>`;
+const host=el('home-screen')?el('home-screen').parentNode:document.body;
+host.appendChild(screen);
+
+const pop=document.createElement('div');pop.id='spx-pop';pop.hidden=true;pop.setAttribute('role','status');pop.setAttribute('aria-live','assertive');
+pop.innerHTML='<div class="spx-pop-card"><div class="spx-pop-icon" id="spx-pop-icon"></div><div class="spx-pop-title" id="spx-pop-title"></div></div>';
+document.body.appendChild(pop);
+
+/* ---------- Runtime state ---------- */
+let view='solar',planetId=null,token=0,busy=false,popKey=null,feedback='';
+let quiz=null; // {state, session, index}
+const timers=new Set();
+function later(fn,ms){const id=setTimeout(()=>{timers.delete(id);fn();},ms);timers.add(id);return id;}
+function clearTimers(){timers.forEach(clearTimeout);timers.clear();}
+function isActive(){return screen.classList.contains('active');}
+
+/* Cancels every pending timer, popup and voice so nothing fires late on another view or screen. */
+function halt(){
+ token++;clearTimers();busy=false;popKey=null;pop.hidden=true;feedback='';
+ audioManager.stop();endGestures();
+}
+
+/* ---------- Solar System map ---------- */
+const map=el('spx-map');
+const MAP=1000,C=500,HIT=80;
+const planetNodes={};
+(function buildMap(){
+ let rnd=7;const rand=()=>((rnd=(rnd*16807)%2147483647)/2147483647);
+ let s='<g aria-hidden="true">';
+ for(let i=0;i<90;i++){const x=rand()*MAP,y=rand()*MAP,r=.8+rand()*1.9;s+=`<circle class="spx-star" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(2)}" style="animation-delay:${(rand()*4).toFixed(2)}s;opacity:${(.4+rand()*.6).toFixed(2)}"/>`;}
+ s+='</g><g aria-hidden="true">';
+ PLANETS.forEach(p=>{s+=`<circle class="spx-orbit" cx="${C}" cy="${C}" r="${p.orbit}"/>`;});
+ s+=`</g><g aria-hidden="true" pointer-events="none">${artAt('sun',C,C,78)}<text class="spx-sun-label" id="spx-sun-label" x="${C}" y="${C+10}"></text></g>`;
+ PLANETS.forEach(p=>{
+  const a=p.angle*Math.PI/180,x=C+p.orbit*Math.cos(a),y=C+p.orbit*Math.sin(a);
+  const below=p.id==='uranus'?40:p.size;
+  const ly=p.labelSide==='above'?y-p.size-14:y+below+34;
+  s+=`<g class="spx-planet" role="button" tabindex="0" data-planet="${p.id}"><circle class="spx-hit" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${HIT}"/><circle class="spx-ring" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${p.size+(p.id==='saturn'?40:12)}"/>${artAt(p.id,x,y,p.size)}<text class="spx-label" x="${x.toFixed(1)}" y="${ly.toFixed(1)}"></text></g>`;
+ });
+ map.innerHTML=s;
+ map.querySelectorAll('.spx-planet').forEach(g=>{planetNodes[g.dataset.planet]=g;});
+ el('spx-chips').innerHTML=PLANETS.map((p,i)=>`<button type="button" class="spx-chip" data-planet="${p.id}">${chipSVG(p.id)}<span class="spx-chip-n">${i+1}</span><span class="spx-chip-name"></span></button>`).join('');
+})();
+
+/* Zoom / pan through the viewBox; "Fit All" restores the full system. */
+const vb={x:0,y:0,w:MAP};const MIN_W=MAP/3.5;
+const pointers=new Map();let gesture=null,dragged=false;
+function applyVB(){
+ vb.w=Math.min(MAP,Math.max(MIN_W,vb.w));
+ vb.x=Math.min(MAP-vb.w,Math.max(0,vb.x));vb.y=Math.min(MAP-vb.w,Math.max(0,vb.y));
+ map.setAttribute('viewBox',`${vb.x.toFixed(2)} ${vb.y.toFixed(2)} ${vb.w.toFixed(2)} ${vb.w.toFixed(2)}`);
+ const zoomed=vb.w<MAP-.5;map.classList.toggle('spx-zoomed',zoomed);
+ el('spx-zoom-out').disabled=!zoomed;el('spx-zoom-in').disabled=vb.w<=MIN_W+.5;el('spx-fit').hidden=!zoomed;
+}
+function zoomBy(f,cx,cy){
+ if(cx===undefined){cx=vb.x+vb.w/2;cy=vb.y+vb.w/2;}
+ const nw=Math.min(MAP,Math.max(MIN_W,vb.w/f)),k=nw/vb.w;
+ vb.x=cx-(cx-vb.x)*k;vb.y=cy-(cy-vb.y)*k;vb.w=nw;applyVB();
+}
+function fitAll(){vb.x=0;vb.y=0;vb.w=MAP;applyVB();}
+function toSvg(px,py){const r=map.getBoundingClientRect();return {x:vb.x+(px-r.left)*vb.w/r.width,y:vb.y+(py-r.top)*vb.w/r.height};}
+function endGestures(){pointers.clear();gesture=null;map.classList.remove('spx-panning');}
+map.addEventListener('pointerdown',e=>{
+ if(e.pointerType==='mouse'&&e.button!==0)return;
+ pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ if(pointers.size===1){dragged=false;gesture={type:'pan',sx:e.clientX,sy:e.clientY,vx:vb.x,vy:vb.y};}
+ else if(pointers.size===2){
+  const [a,b]=[...pointers.values()];
+  gesture={type:'pinch',d:Math.hypot(a.x-b.x,a.y-b.y)||1,w:vb.w,mid:toSvg((a.x+b.x)/2,(a.y+b.y)/2)};dragged=true;
+ }
+});
+map.addEventListener('pointermove',e=>{
+ if(!pointers.has(e.pointerId)||!gesture)return;
+ pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+ const r=map.getBoundingClientRect();
+ if(gesture.type==='pan'&&pointers.size===1){
+  if(vb.w>=MAP-.5)return; // nothing to pan when the whole system is shown
+  const dx=e.clientX-gesture.sx,dy=e.clientY-gesture.sy;
+  if(!dragged&&Math.hypot(dx,dy)<7)return;
+  if(!dragged){dragged=true;try{map.setPointerCapture(e.pointerId);}catch(err){}map.classList.add('spx-panning');}
+  vb.x=gesture.vx-dx*vb.w/r.width;vb.y=gesture.vy-dy*vb.w/r.height;applyVB();e.preventDefault();
+ }else if(gesture.type==='pinch'&&pointers.size===2){
+  const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y)||1;
+  const nw=Math.min(MAP,Math.max(MIN_W,gesture.w*gesture.d/d));
+  vb.w=nw;vb.x=gesture.mid.x-((a.x+b.x)/2-r.left)*nw/r.width;vb.y=gesture.mid.y-((a.y+b.y)/2-r.top)*nw/r.height;applyVB();e.preventDefault();
+ }
+});
+function pointerEnd(e){pointers.delete(e.pointerId);if(pointers.size===0){gesture=null;map.classList.remove('spx-panning');}else if(pointers.size===1){const [p]=[...pointers.values()];gesture={type:'pan',sx:p.x,sy:p.y,vx:vb.x,vy:vb.y};}}
+map.addEventListener('pointerup',pointerEnd);map.addEventListener('pointercancel',pointerEnd);map.addEventListener('lostpointercapture',e=>{if(pointers.has(e.pointerId))pointerEnd(e);});
+map.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();const p=toSvg(e.clientX,e.clientY);zoomBy(e.deltaY<0?1.15:1/1.15,p.x,p.y);},{passive:false});
+map.addEventListener('click',e=>{
+ const g=e.target.closest&&e.target.closest('.spx-planet');if(!g)return;
+ if(dragged){dragged=false;return;}
+ openPlanet(g.dataset.planet);
+});
+map.addEventListener('keydown',e=>{
+ const g=e.target.closest&&e.target.closest('.spx-planet');
+ if(g&&(e.key==='Enter'||e.key===' ')&&!e.repeat){e.preventDefault();openPlanet(g.dataset.planet);}
+});
+el('spx-zoom-in').onclick=()=>{audioManager.click();zoomBy(1.4);};
+el('spx-zoom-out').onclick=()=>{audioManager.click();zoomBy(1/1.4);};
+el('spx-fit').onclick=()=>{audioManager.click();fitAll();};
+el('spx-chips').addEventListener('click',e=>{const b=e.target.closest('.spx-chip');if(b)openPlanet(b.dataset.planet);});
+
+/* ---------- Views ---------- */
+function showView(v,focus){
+ halt();view=v;
+ ['solar','explorer','quiz'].forEach(k=>{el('spx-view-'+k).hidden=k!==v;});
+ if(v==='quiz')loadQuiz();
+ render();
+ try{screen.scrollIntoView({block:'start'});}catch(e){}
+ if(focus!==false){const h=el(v==='solar'?'spx-solar-title':v==='explorer'?'spx-exp-title':'spx-quiz-title');try{h.focus({preventScroll:true});}catch(e){}}
+}
+function openPlanet(id){if(!PLANET_BY_ID[id])return;audioManager.click();planetId=id;showView('explorer');}
+
+function renderTop(){
+ const L=lang(),tx=t();
+ el('spx-home').textContent='🏠 '+tx.back;
+ el('spx-lang').setAttribute('aria-label',tx.langGroup);
+ el('spx-lang').querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.lang===L));b.setAttribute('aria-label',b.dataset.lang==='bm'?'Bahasa Melayu':'English');});
+ const s=el('spx-sound');s.textContent=audioManager.muted?'🔇':'🔊';s.setAttribute('aria-label',audioManager.muted?tx.soundOff:tx.soundOn);s.setAttribute('aria-pressed',String(audioManager.muted));
+}
+function renderSolar(){
+ const L=lang(),tx=t();
+ el('spx-solar-kicker').textContent='🚀 '+tx.module;
+ el('spx-solar-title').textContent=tx.solar;
+ el('spx-tap').textContent=tx.tap;
+ el('spx-note').textContent='ℹ️ '+tx.note;
+ el('spx-note-live').textContent=tx.noteLive;
+ el('spx-pick').textContent=tx.pickPlanet;
+ el('spx-to-quiz').textContent='🧠 '+tx.test;
+ el('spx-sun-label').textContent=SUN[L];
+ map.setAttribute('aria-label',tx.mapLabel);
+ el('spx-zoom-in').setAttribute('aria-label',tx.zoomIn);el('spx-zoom-out').setAttribute('aria-label',tx.zoomOut);
+ el('spx-fit').textContent=tx.fit;el('spx-fit').setAttribute('aria-label',tx.fitLabel);
+ PLANETS.forEach(p=>{
+  const g=planetNodes[p.id];g.querySelector('.spx-label').textContent=p[L];
+  g.setAttribute('aria-label',tx.explore(`${p[L]} (${p[other(L)]})`));
+ });
+ el('spx-chips').querySelectorAll('.spx-chip').forEach(b=>{const p=PLANET_BY_ID[b.dataset.planet];b.querySelector('.spx-chip-name').textContent=p[L];b.setAttribute('aria-label',tx.explore(p[L]));});
+ applyVB();
+}
+function renderExplorer(){
+ const p=PLANET_BY_ID[planetId];if(!p){showView('solar');return;}
+ const L=lang(),tx=t(),idx=PLANETS.indexOf(p)+1,name=p[L],sunName=SUN[L];
+ el('spx-exp-kicker').textContent='🔭 '+tx.explorer;
+ el('spx-exp-title').textContent=name;
+ el('spx-exp-sub').textContent=p[other(L)]===name?'':`(${p[other(L)]})`;
+ el('spx-exp-order').textContent=tx.order(idx);
+ el('spx-hero-planet').innerHTML=artSVG(p.id,name);
+ el('spx-hero-sun').innerHTML=artSVG('sun',sunName);
+ el('spx-hero-planet-cap').textContent=name;el('spx-hero-sun-cap').textContent=sunName;
+ el('spx-illus').textContent='🎨 '+tx.illus;
+ el('spx-size-title').textContent='📏 '+tx.size;
+ el('spx-size-intro').textContent=tx.sizeIntro;
+ el('spx-scale-tag').textContent=tx.scaleTag;el('spx-zoom-tag').textContent=tx.zoomTag;
+ // True-ratio drawing: both circles use real diameters at one shared scale.
+ const SUN_R=140,pr=SUN_R*p.diameter/SUN.diameter,px=352,cy=165,mark=Math.max(pr+8,13);
+ el('spx-scale-svg').innerHTML=`<svg viewBox="0 0 400 330" role="img" aria-label="${sunName} ${nf(SUN.diameter)} km, ${name} ${nf(p.diameter)} km">
+  <circle cx="160" cy="${cy}" r="${SUN_R}" fill="url(#spx-g-sun)"/>
+  <text x="160" y="${cy+8}" text-anchor="middle" font-family="Fredoka One, Quicksand, sans-serif" font-size="26" fill="#7a3300">${sunName}</text>
+  <circle cx="${px}" cy="${cy}" r="${pr.toFixed(3)}" fill="#fff"/>
+  <circle cx="${px}" cy="${cy}" r="${mark.toFixed(2)}" fill="none" stroke="#ff86d9" stroke-width="2.5" stroke-dasharray="5 4"/>
+  <text x="${px}" y="${(cy+mark+26).toFixed(1)}" text-anchor="middle" font-family="Fredoka One, Quicksand, sans-serif" font-size="22" fill="#fff">${name}</text>
+  <line x1="20" y1="${cy+SUN_R+14}" x2="300" y2="${cy+SUN_R+14}" stroke="#ffd54a" stroke-width="3"/><line x1="20" y1="${cy+SUN_R+8}" x2="20" y2="${cy+SUN_R+20}" stroke="#ffd54a" stroke-width="3"/><line x1="300" y1="${cy+SUN_R+8}" x2="300" y2="${cy+SUN_R+20}" stroke="#ffd54a" stroke-width="3"/>
+ </svg>`;
+ el('spx-scale-cap').textContent=tx.scaleCap;
+ el('spx-zoom-svg').innerHTML=artSVG(p.id,name);
+ el('spx-zoom-cap').textContent=tx.zoomCap(name);
+ const parts=tx.ratio(p.ratio,name),r=el('spx-ratio');r.replaceChildren(document.createTextNode('☀️ '+parts[0]));const b=document.createElement('strong');b.textContent=parts[1];r.append(b,document.createTextNode(parts[2]));
+ const d=el('spx-diam');d.replaceChildren();
+ [[tx.diameterOf(sunName),nf(SUN.diameter)+' km'],[tx.diameterOf(name),nf(p.diameter)+' km'+(p.noRings?` (${tx.noRings})`:'')]].forEach(([k,v])=>{const s=document.createElement('span');s.textContent=`${k}: ${v}`;d.appendChild(s);});
+ el('spx-facts-title').textContent='⭐ '+tx.facts;
+ const f=el('spx-facts');f.replaceChildren();
+ p.facts.forEach((fact,i)=>{const li=document.createElement('li'),n=document.createElement('b'),s=document.createElement('span');n.textContent=i+1;s.textContent=fact[L];li.append(n,s);f.appendChild(li);});
+ el('spx-switch').textContent='🪐 '+tx.switchPlanet;
+ el('spx-exp-quiz').textContent='🧠 '+tx.test;
+}
+
+/* ---------- Test Your Knowledge ---------- */
+function loadQuiz(){
+ const {state,session}=quizState.current();
+ let index=0;while(index<SESSION_SIZE&&session.answered[session.ids[index]])index++;
+ quiz={state,session,index};feedback='';
+}
+function renderQuiz(){
+ if(!quiz)loadQuiz();
+ const L=lang(),tx=t(),{session,index}=quiz,qid=session.ids[Math.min(index,SESSION_SIZE-1)],q=QUESTION_BY_ID[qid];
+ el('spx-quiz-kicker').textContent='🚀 '+tx.module;
+ el('spx-quiz-title').textContent=tx.test;
+ el('spx-progress').textContent=tx.qOf(Math.min(index,SESSION_SIZE-1)+1,SESSION_SIZE);
+ el('spx-dots').innerHTML=session.ids.map((id,i)=>`<i class="${session.answered[id]?'spx-done':i===index?'spx-now':''}"></i>`).join('');
+ el('spx-question').textContent=q[L];
+ el('spx-quiz-intro').textContent=tx.quizIntro;
+ const wrong=session.wrong[qid]||[],answered=session.answered[qid];
+ const box=el('spx-options');box.replaceChildren();
+ session.order[qid].forEach((optId,i)=>{
+  const opt=q.options.find(o=>o.id===optId),b=document.createElement('button');
+  b.type='button';b.className='spx-option';b.dataset.opt=optId;
+  const letter=document.createElement('span');letter.className='spx-letter';letter.textContent='ABCD'[i];letter.setAttribute('aria-hidden','true');
+  const txt=document.createElement('span');txt.textContent=opt[L];b.append(letter,txt);
+  if(wrong.includes(optId)){b.classList.add('spx-wrong');b.disabled=true;}
+  if(answered===optId)b.classList.add('spx-correct');
+  if(busy||answered)b.disabled=true;
+  box.appendChild(b);
+ });
+ el('spx-feedback').textContent=feedback==='try'?'❌ '+tx.tryAgain:'';
+ el('spx-quiz-back').textContent=tx.solarBtn;
+}
+el('spx-options').addEventListener('click',e=>{
+ const b=e.target.closest('.spx-option');if(!b||b.disabled||busy||!quiz)return;
+ const {state,session,index}=quiz,qid=session.ids[index],q=QUESTION_BY_ID[qid];
+ if(!q||session.answered[qid])return;
+ const optId=b.dataset.opt;
+ if(optId!==q.correctOptionId){
+  audioManager.wrong();
+  const w=session.wrong[qid]||(session.wrong[qid]=[]);if(!w.includes(optId))w.push(optId);
+  quizState.save(state);feedback='try';renderQuiz();
+  const again=el('spx-options').querySelector(`[data-opt="${optId}"]`);if(again){again.classList.add('spx-shake');}
+  return;
+ }
+ // Lock immediately so a double tap cannot skip ahead.
+ busy=true;el('spx-options').querySelectorAll('button').forEach(x=>{x.disabled=true;});
+ session.answered[qid]=optId;feedback='';
+ const last=index===SESSION_SIZE-1;
+ if(last){state.lastSession=session.ids.slice();state.session=null;state.completedSessions=(state.completedSessions||0)+1;}
+ quizState.save(state);
+ renderQuiz();
+ showPop('correct');audioManager.correct();
+ const tok=token;
+ later(()=>{
+  if(tok!==token||!isActive())return;
+  hidePop();
+  if(!last){quiz.index++;busy=false;renderQuiz();try{el('spx-question').focus({preventScroll:true});}catch(err){}return;}
+  showPop('allDone');audioManager.allDone();
+  later(()=>{if(tok!==token||!isActive())return;hidePop();quiz=null;showView('solar');},2000);
+ },2000);
+});
+el('spx-quiz-back').onclick=()=>{audioManager.click();showView('solar');};
+
+function showPop(key){popKey=key;renderPop();pop.hidden=false;}
+function hidePop(){popKey=null;pop.hidden=true;}
+function renderPop(){if(!popKey)return;el('spx-pop-icon').textContent=popKey==='correct'?'🌟 🚀 🌟':'🎉 🪐 🎉';el('spx-pop-title').textContent=t()[popKey];}
+
+function render(){
+ renderTop();
+ if(view==='solar')renderSolar();else if(view==='explorer')renderExplorer();else renderQuiz();
+ renderPop();
+}
+
+/* ---------- Controls ---------- */
+el('spx-home').onclick=()=>{audioManager.click();halt();quiz=null;if(typeof showScreen==='function')showScreen('home-screen');};
+el('spx-sound').onclick=()=>{const m=!audioManager.muted;audioManager.setMuted(m);if(!m)audioManager.click();renderTop();};
+el('spx-lang').addEventListener('click',e=>{
+ const b=e.target.closest('button[data-lang]');if(!b)return;audioManager.click();
+ const L=b.dataset.lang;store.set(LANG_KEY,L);
+ if(L!==lang()&&typeof window.setGlobalLanguage==='function')window.setGlobalLanguage(L==='bm'?'ms':'en');else render();
+});
+el('spx-to-quiz').onclick=()=>{audioManager.click();showView('quiz');};
+el('spx-exp-quiz').onclick=()=>{audioManager.click();showView('quiz');};
+el('spx-switch').onclick=()=>{audioManager.click();showView('solar');};
+
+// Re-render on app-wide language changes without resetting the quiz session or progress.
+const priorLang=window.setGlobalLanguage;
+if(typeof priorLang==='function')window.setGlobalLanguage=function(){
+ const res=priorLang.apply(this,arguments);
+ try{if(isActive())render();}catch(e){}
+ return res;
+};
+// Remember only languages the user picks (the app also calls setGlobalLanguage itself on start-up).
+['lang-btn-en','lang-btn-ms'].forEach(id=>{const b=el(id);if(b)b.addEventListener('click',()=>store.set(LANG_KEY,id==='lang-btn-ms'?'bm':'en'));});
+// Leaving the module by any route cancels timers, popups and voice.
+const priorShow=window.showScreen;
+if(typeof priorShow==='function')window.showScreen=function(id){if(id!=='space-screen'&&isActive()){halt();quiz=null;}return priorShow.apply(this,arguments);};
+
+window.openSpaceAdventure=function(){
+ halt();
+ const saved=store.get(LANG_KEY);
+ if((saved==='bm'||saved==='en')&&saved!==lang()&&typeof window.setGlobalLanguage==='function')window.setGlobalLanguage(saved==='bm'?'ms':'en');
+ fitAll();planetId=null;quiz=null;
+ if(typeof showScreen==='function')showScreen('space-screen');
+ showView('solar',false);
+};
+})();
+</script>
+<!-- END SPACE ADVENTURE MODULE -->
 
 </body>
 </html>
